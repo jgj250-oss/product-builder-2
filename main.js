@@ -1,22 +1,39 @@
 const API_KEY = '879bd560d1bf4d34971e7541d8d8d748';
 
+const foodTranslator = {
+    "Chicken": "닭고기", "Salad": "샐러드", "Rice": "밥", "Soup": "국/수프", "Beef": "소고기", "Pork": "돼지고기", 
+    "Fish": "생선", "Salmon": "연어", "Vegetable": "채소", "Noodle": "면", "Fried": "볶음/튀김", "Roasted": "구이",
+    "Steamed": "찜", "Boiled": "삶은", "Healthy": "건강식", "Bowl": "덮밥", "Stew": "찌개", "Bread": "빵",
+    "Tofu": "두부", "Egg": "계란", "Brown Rice": "현미밥", "Kimchi": "김치", "Porridge": "죽"
+};
+
+function translateText(text) {
+    if (!text) return "";
+    let translated = text;
+    Object.keys(foodTranslator).forEach(key => {
+        const regex = new RegExp(key, "gi");
+        translated = translated.replace(regex, foodTranslator[key]);
+    });
+    return translated;
+}
+
 document.addEventListener('DOMContentLoaded', () => {
     const translations = {
         ko: { 
-            title: "VitalPlate", subtitle: "BMI 분석 기반 AI 맞춤형 식단 솔루션", step1: "1. 정보 입력", step2: "2. 알러지", btn: "AI 맞춤 식단 생성", 
-            recipeTitle: "식단 상세 정보", breakfast: "☀️ 아침 식단", lunch: "🌤️ 점심 식단", dinner: "🌙 저녁 식단", close: "닫기", 
-            reportTitle: "분석 리포트 및 맞춤 식단", clickTip: "* 각 음식을 클릭하면 영양 성분과 레시피를 확인합니다.",
-            bmiLabel: "나의 BMI 수치", statusLabel: "상태", targetCal: "추천 일일 섭취량",
+            title: "VitalPlate", subtitle: "AI 맞춤형 글로벌 식단 가이드", step1: "1. 정보 입력", step2: "2. 알러지", btn: "AI 맞춤 식단 생성", 
+            recipeTitle: "상세 정보", breakfast: "☀️ 아침", lunch: "🌤️ 점심", dinner: "🌙 저녁", close: "닫기", 
+            reportTitle: "나의 맞춤 식단 리포트", clickTip: "* 이미지를 클릭하면 상세 레시피를 확인합니다.",
+            bmiLabel: "BMI 지수", statusLabel: "상태", targetCal: "추천 칼로리",
             underweight: "저체중", normal: "정상", overweight: "과체중", obese: "비만",
-            loading: "신체 정보를 분석하여 최적의 식단을 조합 중...", error: "분석 실패. 다시 시도해주세요."
+            loading: "최적의 식단을 구성 중입니다...", error: "분석 실패. 다시 시도해주세요."
         },
         en: { 
-            title: "VitalPlate", subtitle: "BMI-Based AI Nutrition Solution", step1: "1. Info", step2: "2. Allergy", btn: "Generate Personal Plan", 
+            title: "VitalPlate", subtitle: "AI-Powered Nutrition Guide", step1: "1. Info", step2: "2. Allergy", btn: "Generate Plan", 
             recipeTitle: "Meal Details", breakfast: "☀️ Breakfast", lunch: "🌤️ Lunch", dinner: "🌙 Dinner", close: "Close", 
-            reportTitle: "Analysis & Meal Plan", clickTip: "* Click on a meal for details.",
-            bmiLabel: "Your BMI", statusLabel: "Status", targetCal: "Recommended Daily Intake",
+            reportTitle: "Your Health Report", clickTip: "* Click on a meal for details.",
+            bmiLabel: "BMI", statusLabel: "Status", targetCal: "Daily Calories",
             underweight: "Underweight", normal: "Normal", overweight: "Overweight", obese: "Obese",
-            loading: "Analyzing body info and composing meals...", error: "Failed to fetch data."
+            loading: "Analyzing and Composing...", error: "Failed to fetch data."
         }
     };
 
@@ -33,12 +50,12 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('generate-plan').textContent = t.btn;
     }
 
-    const allergyMap = { "난류": "egg", "우유": "dairy", "메밀": "wheat", "땅콩": "peanut", "대두": "soy", "밀": "wheat", "고등어": "seafood", "게": "shellfish", "새우": "shellfish", "돼지고기": "pork", "복숭아": "fruit", "토마토": "nightshade" };
     const allergyContainer = document.getElementById('allergy-list');
-    Object.keys(allergyMap).forEach(item => {
+    const allergies = ["egg", "dairy", "wheat", "peanut", "soy", "seafood", "shellfish", "pork"];
+    allergies.forEach(item => {
         const label = document.createElement('label');
         label.className = 'allergy-item';
-        label.innerHTML = `<input type="checkbox" value="${allergyMap[item]}"> ${item}`;
+        label.innerHTML = `<input type="checkbox" value="${item}"> ${item}`;
         allergyContainer.appendChild(label);
     });
 
@@ -57,101 +74,59 @@ document.addEventListener('DOMContentLoaded', () => {
         generateBtn.textContent = t.loading;
         generateBtn.disabled = true;
 
-        // 1. BMI 및 TDEE 계산
         const bmi = (weight / ((height / 100) ** 2)).toFixed(1);
         let bmr = (10 * weight) + (6.25 * height) - (5 * age);
         bmr = (gender === 'male') ? bmr + 5 : bmr - 161;
-        let tdee = bmr * 1.375; // 평균 활동량 기준
+        let targetCalories = bmr * 1.3 - (goal === 'diet' ? 500 : (goal === 'muscle' ? -500 : 0));
 
-        let targetCalories = tdee;
-        if (goal === 'diet') targetCalories -= 500;
-        if (goal === 'muscle') targetCalories += 500;
-
-        const selectedIntolerances = Array.from(document.querySelectorAll('#allergy-list input:checked')).map(cb => cb.value).join(',');
-        
         try {
-            // 메인 요리 검색 (단백질 중심)
-            const mainQuery = `https://api.spoonacular.com/recipes/complexSearch?apiKey=${API_KEY}&cuisine=${getCC(country)}&type=main course&intolerances=${selectedIntolerances}&number=14&addRecipeInformation=true&fillIngredients=true&minProtein=${goal === 'muscle' ? 25 : 15}`;
-            // 사이드 및 국물 요리 검색
-            const sideQuery = `https://api.spoonacular.com/recipes/complexSearch?apiKey=${API_KEY}&cuisine=${getCC(country)}&type=side dish,salad,soup&intolerances=${selectedIntolerances}&number=14&addRecipeInformation=true`;
-
-            const [mainRes, sideRes] = await Promise.all([fetch(mainQuery), fetch(sideQuery)]);
-            const mainData = await mainRes.json();
-            const sideData = await sideRes.json();
-
-            renderImprovedResult(mainData.results, sideData.results, bmi, targetCalories, t);
-        } catch (error) {
-            alert(t.error);
-        } finally {
-            generateBtn.textContent = t.btn;
-            generateBtn.disabled = false;
-        }
+            const cuisine = { korean: 'Korean', japanese: 'Japanese', chinese: 'Chinese', mediterranean: 'Mediterranean', western: 'European' }[country];
+            // 21개의 식단을 한꺼번에 가져옴 (아침7, 점심7, 저녁7)
+            const query = `https://api.spoonacular.com/recipes/complexSearch?apiKey=${API_KEY}&cuisine=${cuisine}&number=21&addRecipeInformation=true&fillIngredients=true&addRecipeNutrition=true&language=${currentLang}`;
+            
+            const res = await fetch(query);
+            const data = await res.json();
+            renderResult(data.results, bmi, targetCalories, t);
+        } catch (e) { alert(t.error); }
+        finally { generateBtn.textContent = t.btn; generateBtn.disabled = false; }
     });
 
-    function getCC(c) {
-        const m = { korean: 'Korean', japanese: 'Japanese', chinese: 'Chinese', mediterranean: 'Mediterranean', western: 'European' };
-        return m[c] || 'Korean';
-    }
-
-    function renderImprovedResult(mains, sides, bmi, targetCal, t) {
+    function renderResult(recipes, bmi, targetCal, t) {
         const resultDiv = document.getElementById('diet-result');
         resultDiv.style.display = 'block';
         
         let status = t.normal;
-        let color = "#4caf50";
-        if (bmi < 18.5) { status = t.underweight; color = "#2196f3"; }
-        else if (bmi >= 25 && bmi < 30) { status = t.overweight; color = "#ff9800"; }
-        else if (bmi >= 30) { status = t.obese; color = "#f44336"; }
+        if (bmi < 18.5) status = t.underweight;
+        else if (bmi >= 25 && bmi < 30) status = t.overweight;
+        else if (bmi >= 30) status = t.obese;
 
         let html = `
-            <div class="form-container result-card" style="margin-top: 30px; border-top: 8px solid ${color};">
-                <div style="display: flex; justify-content: space-around; align-items: center; background: rgba(0,0,0,0.03); padding: 20px; border-radius: 15px; margin-bottom: 30px;">
-                    <div style="text-align:center;">
-                        <small>${t.bmiLabel}</small>
-                        <div style="font-size: 2rem; font-weight: 800; color: ${color};">${bmi}</div>
-                    </div>
-                    <div style="text-align:center;">
-                        <small>${t.statusLabel}</small>
-                        <div style="font-size: 1.2rem; font-weight: 700;">${status}</div>
-                    </div>
-                    <div style="text-align:center;">
-                        <small>${t.targetCal}</small>
-                        <div style="font-size: 1.2rem; font-weight: 700;">${Math.round(targetCal)} kcal</div>
-                    </div>
+            <div class="form-container result-card" style="margin-top: 30px;">
+                <div class="bmi-info" style="display: flex; justify-content: space-around; background: #f8f9fa; padding: 20px; border-radius: 15px; margin-bottom: 30px;">
+                    <div><small>${t.bmiLabel}</small><div style="font-size: 1.5rem; font-weight: bold;">${bmi}</div></div>
+                    <div><small>${t.statusLabel}</small><div style="font-size: 1.5rem; font-weight: bold;">${status}</div></div>
+                    <div><small>${t.targetCal}</small><div style="font-size: 1.5rem; font-weight: bold;">${Math.round(targetCal)} kcal</div></div>
                 </div>
-
-                <h2 style="text-align: center; margin-bottom: 20px;">🗓️ ${t.reportTitle}</h2>
+                <h2 style="text-align: center;">${t.reportTitle}</h2>
                 <div class="diet-grid">
         `;
 
-        const days = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
-        days.forEach((day, i) => {
-            const morning = { main: mains[i] || mains[0], side: sides[i] || sides[0] };
-            const evening = { main: mains[i+7] || mains[1], side: sides[i+7] || sides[1] };
+        ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].forEach((day, i) => {
+            // 끼니별 데이터 배분 (중복 방지)
+            const meals = [recipes[i] || recipes[0], recipes[i+7] || recipes[1], recipes[i+14] || recipes[2]];
+            const times = [t.breakfast, t.lunch, t.dinner];
 
-            html += `
-                <div class="day-card" style="background: var(--form-bg);">
-                    <h4 style="background: ${color}; color: white; padding: 5px 15px; border-radius: 10px; display: inline-block;">${day}</h4>
-                    <div class="meal-time">
-                        <div class="meal-box" onclick="openFullRecipe(${morning.main.id})">
-                            <div class="meal-tag">${t.breakfast}</div>
-                            <img src="${morning.main.image}" class="meal-img">
-                            <div class="meal-name">${morning.main.title}</div>
-                            <div class="meal-side">+ ${morning.side.title}</div>
-                        </div>
-                        <div class="meal-box" onclick="openFullRecipe(1003)"> <!-- 가상의 건강식 덮밥 -->
-                            <div class="meal-tag">${t.lunch}</div>
-                            <div class="meal-name">Healthy Grain Bowl with Protein</div>
-                            <div class="meal-side">+ Fresh Garden Salad</div>
-                        </div>
-                        <div class="meal-item api-meal" onclick="openFullRecipe(${evening.main.id})">
-                            <div class="meal-tag">${t.dinner}</div>
-                            <img src="${evening.main.image}" class="meal-img">
-                            <div class="meal-name">${evening.main.title}</div>
-                            <div class="meal-side">+ ${evening.side.title}</div>
-                        </div>
-                    </div>
-                </div>`;
+            html += `<div class="day-card"><h4>${day}</h4><div class="meal-time">`;
+            meals.forEach((m, idx) => {
+                const title = currentLang === 'ko' ? translateText(m.title) : m.title;
+                html += `
+                    <div class="meal-box" onclick="openFullRecipe(${m.id})">
+                        <div class="meal-tag">${times[idx]}</div>
+                        <img src="${m.image}" class="meal-img">
+                        <div class="meal-name">${title}</div>
+                    </div>`;
+            });
+            html += `</div></div>`;
         });
 
         html += `</div></div>`;
@@ -159,27 +134,26 @@ document.addEventListener('DOMContentLoaded', () => {
         resultDiv.scrollIntoView({ behavior: 'smooth' });
     }
 
-    window.openFullRecipe = async function(recipeId) {
-        // ... 기존 코드와 동일 (영양 성분 표시 포함)
-        try {
-            const response = await fetch(`https://api.spoonacular.com/recipes/${recipeId}/information?apiKey=${API_KEY}&includeNutrition=true`);
-            const recipe = await response.json();
-            const modal = document.createElement('div');
-            modal.className = 'recipe-modal';
-            const nutrition = recipe.nutrition.nutrients.filter(n => ['Calories', 'Protein', 'Fat', 'Carbohydrates'].includes(n.name));
-            let nHtml = nutrition.map(n => `<li><strong>${n.name}:</strong> ${n.amount}${n.unit}</li>`).join('');
-
-            modal.innerHTML = `
-                <div class="modal-content">
-                    <span class="close-btn" onclick="this.parentElement.parentElement.remove()">&times;</span>
-                    <h2 style="color: #ff9a9e;">🍳 ${recipe.title}</h2>
-                    <img src="${recipe.image}" style="width: 100%; border-radius: 15px; margin: 15px 0;">
-                    <div class="nutrition-card" style="background: #fdf2f2; padding: 15px; border-radius: 10px; margin-bottom: 20px;">
-                        <ul style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding:0; list-style:none;">${nHtml}</ul>
-                    </div>
-                    <div style="font-size: 1rem; line-height:1.6;">${recipe.instructions || 'Detailed instructions at: <a href="'+recipe.sourceUrl+'" target="_blank">View Site</a>'}</div>
-                </div>`;
-            document.body.appendChild(modal);
-        } catch(e) {}
+    window.openFullRecipe = async function(id) {
+        const t = translations[currentLang] || translations['ko'];
+        const res = await fetch(`https://api.spoonacular.com/recipes/${id}/information?apiKey=${API_KEY}&includeNutrition=true`);
+        const r = await res.json();
+        const nutrients = r.nutrition.nutrients.filter(n => ['Calories', 'Protein', 'Fat', 'Carbohydrates'].includes(n.name));
+        
+        const modal = document.createElement('div');
+        modal.className = 'recipe-modal';
+        modal.innerHTML = `
+            <div class="modal-content">
+                <span class="close-btn" onclick="this.parentElement.parentElement.remove()">&times;</span>
+                <h2 style="color: #ff9a9e;">🍳 ${currentLang === 'ko' ? translateText(r.title) : r.title}</h2>
+                <img src="${r.image}" style="width:100%; border-radius:15px; margin:15px 0;">
+                <div style="background:#f8f9fa; padding:15px; border-radius:10px; margin-bottom:20px;">
+                    <ul style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; padding:0; list-style:none;">
+                        ${nutrients.map(n => `<li><strong>${n.name}:</strong> ${n.amount}${n.unit}</li>`).join('')}
+                    </ul>
+                </div>
+                <div style="line-height:1.6;">${r.instructions || 'Check website for details.'}</div>
+            </div>`;
+        document.body.appendChild(modal);
     };
 });
