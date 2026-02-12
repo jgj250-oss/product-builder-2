@@ -156,14 +156,27 @@ input:focus, select:focus, textarea:focus {
     border: 1px solid transparent;
 }
 
-.meal-item:hover {
-    background: rgba(255, 154, 158, 0.1);
-    border-color: #ff9a9e;
+.api-meal img {
+    height: 150px;
+    object-fit: cover;
+    transition: transform 0.3s;
+}
+
+.api-meal:hover img {
+    transform: scale(1.05);
+}
+
+.meal-item strong {
+    color: #ff9a9e;
+    font-size: 0.8rem;
+    display: block;
+    margin-bottom: 5px;
 }
 
 .meal-item span {
-    font-size: 1.05rem;
-    font-weight: 500;
+    font-size: 0.95rem;
+    line-height: 1.2;
+    display: block;
 }
 
 /* Modal Styles */
