@@ -100,7 +100,21 @@ class DinnerRecommender extends HTMLElement {
   }
 }
 
+class DinnerRecommenderEn extends DinnerRecommender {
+  constructor() {
+    super();
+    this.shadowRoot.querySelector('button').textContent = 'What should I eat?';
+    this.menus = [
+      'Fried Chicken', 'Pizza', 'Grilled Pork Belly', 'Pig\'s Trotters', 'Burger',
+      'Sushi', 'Malatang', 'Tteokbokki', 'Pork Cutlet', 'Pasta',
+      'Stir-fried Pork', 'Kimchi Stew', 'Soybean Paste Stew', 'Bibimbap', 'Kalguksu',
+      'Jajangmyeon', 'Jjamppong', 'Sweet and Sour Pork', 'Pho', 'Steak'
+    ];
+  }
+}
+
 customElements.define('dinner-recommender', DinnerRecommender);
+customElements.define('dinner-recommender-en', DinnerRecommenderEn);
 
 // Theme toggle logic
 document.addEventListener('DOMContentLoaded', () => {
