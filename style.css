@@ -28,7 +28,7 @@ body {
     justify-content: flex-start;
     min-height: 100vh;
     margin: 0;
-    padding: 40px 20px;
+    padding: 0;
     background-color: var(--bg-color);
     background-image: repeating-radial-gradient(circle at center, var(--bg-pattern-color) 0, var(--bg-pattern-color) 1px, transparent 1px, transparent 100%);
     background-size: 0.5em 0.5em;
@@ -36,11 +36,21 @@ body {
     transition: background-color 0.3s ease;
 }
 
+header {
+    width: 100%;
+    box-sizing: border-box;
+}
+
 main {
     display: flex;
     flex-direction: column;
     align-items: center;
+    margin-top: 40px;
     margin-bottom: 80px;
+    padding: 0 20px;
+    width: 100%;
+    max-width: 1000px;
+    box-sizing: border-box;
 }
 
 h1 {
