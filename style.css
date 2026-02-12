@@ -156,27 +156,55 @@ input:focus, select:focus, textarea:focus {
     border: 1px solid transparent;
 }
 
-.api-meal img {
-    height: 150px;
-    object-fit: cover;
-    transition: transform 0.3s;
+.meal-box {
+    padding: 15px;
+    background: rgba(0,0,0,0.03);
+    border-radius: 15px;
+    margin-bottom: 15px;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: 1px solid transparent;
 }
 
-.api-meal:hover img {
-    transform: scale(1.05);
+.meal-box:hover {
+    background: white;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    border-color: #ff9a9e;
+    transform: scale(1.02);
 }
 
-.meal-item strong {
+.meal-tag {
+    font-size: 0.75rem;
+    font-weight: 800;
     color: #ff9a9e;
-    font-size: 0.8rem;
-    display: block;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.meal-img {
+    width: 100%;
+    height: 120px;
+    object-fit: cover;
+    border-radius: 10px;
+    margin-bottom: 10px;
+}
+
+.meal-name {
+    font-size: 1rem;
+    font-weight: 700;
+    line-height: 1.2;
     margin-bottom: 5px;
 }
 
-.meal-item span {
-    font-size: 0.95rem;
-    line-height: 1.2;
-    display: block;
+.meal-side {
+    font-size: 0.85rem;
+    color: #666;
+    font-style: italic;
+}
+
+.nutrition-card li {
+    font-size: 0.9rem;
 }
 
 /* Modal Styles */
