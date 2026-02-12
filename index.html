@@ -3,16 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dinner Menu Recommender</title>
+    <title>Dinner Menu Recommender / 저녁 메뉴 추천</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div style="position: absolute; top: 20px; left: 20px;">
-        <a href="index_en.html" style="color: var(--text-color); text-decoration: none; padding: 10px; border: 1px solid var(--text-color); border-radius: 5px;">🇺🇸 English</a>
-    </div>
     <button id="theme-toggle" style="position: absolute; top: 20px; right: 20px; padding: 10px 15px; border-radius: 5px; border: none; background-color: #555; color: white; cursor: pointer;">Toggle Theme</button>
     <h1>Dinner Menu Recommender</h1>
     <dinner-recommender></dinner-recommender>
     <script src="main.js"></script>
+    <script>
+        // Update H1 based on language
+        if (!navigator.language.startsWith('en')) {
+            document.querySelector('h1').textContent = '오늘 저녁 뭐 먹지?';
+        }
+    </script>
 </body>
 </html>

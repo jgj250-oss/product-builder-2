@@ -1,18 +1,17 @@
 class DinnerRecommender extends HTMLElement {
   constructor() {
     super();
-    const shadow = this.attachShadow({ mode: 'open' });
+    this.attachShadow({ mode: 'open' });
+    this.isEnglish = navigator.language.startsWith('en');
+    this.render();
+  }
 
-    const wrapper = document.createElement('div');
-    wrapper.setAttribute('class', 'wrapper');
+  connectedCallback() {
+    // 페이지 로드 시 자동으로 첫 번째 추천 실행
+    this.recommendMenu();
+  }
 
-    const button = document.createElement('button');
-    button.textContent = '오늘 뭐 먹지?';
-    button.addEventListener('click', () => this.recommendMenu());
-
-    const resultContainer = document.createElement('div');
-    resultContainer.setAttribute('class', 'result');
-
+  render() {
     const style = document.createElement('style');
     style.textContent = `
       .wrapper {
@@ -22,7 +21,7 @@ class DinnerRecommender extends HTMLElement {
       }
       button {
         padding: 15px 40px;
-        font-size: 1.5rem;
+        font-size: 1.2rem;
         font-weight: bold;
         color: white;
         background: linear-gradient(145deg, #ff9a9e, #fad0c4);
@@ -39,10 +38,15 @@ class DinnerRecommender extends HTMLElement {
       }
       .result {
         display: flex;
-        gap: 15px;
-        flex-wrap: wrap;
-        justify-content: center;
-        min-height: 100px;
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+        min-height: 150px;
+      }
+      .label {
+        font-size: 1.1rem;
+        opacity: 0.8;
+        margin-bottom: 5px;
       }
       .menu-item {
         padding: 20px 40px;
@@ -71,12 +75,28 @@ class DinnerRecommender extends HTMLElement {
       }
     `;
 
-    shadow.appendChild(style);
-    shadow.appendChild(wrapper);
+    const wrapper = document.createElement('div');
+    wrapper.setAttribute('class', 'wrapper');
+
+    const button = document.createElement('button');
+    button.textContent = this.isEnglish ? 'Show Me Another!' : '다른 거 추천해줘!';
+    button.addEventListener('click', () => this.recommendMenu());
+
+    const resultContainer = document.createElement('div');
+    resultContainer.setAttribute('class', 'result');
+
+    this.shadowRoot.innerHTML = '';
+    this.shadowRoot.appendChild(style);
+    this.shadowRoot.appendChild(wrapper);
     wrapper.appendChild(button);
     wrapper.appendChild(resultContainer);
 
-    this.menus = [
+    this.menus = this.isEnglish ? [
+      'Fried Chicken', 'Pizza', 'Grilled Pork Belly', 'Pig\'s Trotters', 'Burger',
+      'Sushi', 'Malatang', 'Tteokbokki', 'Pork Cutlet', 'Pasta',
+      'Stir-fried Pork', 'Kimchi Stew', 'Soybean Paste Stew', 'Bibimbap', 'Kalguksu',
+      'Jajangmyeon', 'Jjamppong', 'Sweet and Sour Pork', 'Pho', 'Steak'
+    ] : [
       '치킨', '피자', '삼겹살', '족발', '햄버거', 
       '초밥', '마라탕', '떡볶이', '돈까스', '파스타',
       '제육볶음', '김치찌개', '된장찌개', '비빔밥', '칼국수',
@@ -88,7 +108,10 @@ class DinnerRecommender extends HTMLElement {
     const resultContainer = this.shadowRoot.querySelector('.result');
     resultContainer.innerHTML = '';
     
-    // Pick a random menu
+    const label = document.createElement('div');
+    label.setAttribute('class', 'label');
+    label.textContent = this.isEnglish ? "How about this?" : "오늘 이건 어때요?";
+    
     const randomIndex = Math.floor(Math.random() * this.menus.length);
     const selectedMenu = this.menus[randomIndex];
     
@@ -96,25 +119,12 @@ class DinnerRecommender extends HTMLElement {
     menuDiv.setAttribute('class', 'menu-item');
     menuDiv.textContent = selectedMenu;
     
+    resultContainer.appendChild(label);
     resultContainer.appendChild(menuDiv);
   }
 }
 
-class DinnerRecommenderEn extends DinnerRecommender {
-  constructor() {
-    super();
-    this.shadowRoot.querySelector('button').textContent = 'What should I eat?';
-    this.menus = [
-      'Fried Chicken', 'Pizza', 'Grilled Pork Belly', 'Pig\'s Trotters', 'Burger',
-      'Sushi', 'Malatang', 'Tteokbokki', 'Pork Cutlet', 'Pasta',
-      'Stir-fried Pork', 'Kimchi Stew', 'Soybean Paste Stew', 'Bibimbap', 'Kalguksu',
-      'Jajangmyeon', 'Jjamppong', 'Sweet and Sour Pork', 'Pho', 'Steak'
-    ];
-  }
-}
-
 customElements.define('dinner-recommender', DinnerRecommender);
-customElements.define('dinner-recommender-en', DinnerRecommenderEn);
 
 // Theme toggle logic
 document.addEventListener('DOMContentLoaded', () => {
