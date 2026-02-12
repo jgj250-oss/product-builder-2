@@ -1,235 +1,146 @@
-class DinnerRecommender extends HTMLElement {
-  constructor() {
-    super();
-    this.attachShadow({ mode: 'open' });
-    this.isEnglish = navigator.language.startsWith('en');
-    
-    this.keywordMap = {
-      '치킨': { en: 'fried chicken', desc: '바삭한 튀김옷과 촉촉한 속살의 조화! 오늘 하루 고생한 당신에게 주는 최고의 선물입니다.', tips: '맥주나 콜라와 함께 즐기면 더욱 맛있어요.' },
-      '피자': { en: 'pizza', desc: '다양한 토핑과 치즈의 풍미가 가득! 가족이나 친구와 함께 나누어 먹기 좋습니다.', tips: '갈릭 디핑 소스를 곁들여 보세요.' },
-      '삼겹살': { en: 'pork belly', desc: '지글지글 구워지는 소리만으로도 행복해지는 맛. 쌈 채소와 함께 건강하게 즐기세요.', tips: '구운 김치와 마늘은 필수입니다.' },
-      '족발': { en: 'pork trotters', desc: '콜라겐 가득 쫄깃한 식감! 야식의 대명사이지만 저녁 식사로도 든든합니다.', tips: '막국수와 함께 먹으면 느끼함을 잡아줍니다.' },
-      '햄버거': { en: 'hamburger', desc: '간편하면서도 영양 가득한 한 끼. 신선한 야채와 패티의 육즙을 느껴보세요.', tips: '감자튀김 대신 샐러드를 선택해 건강을 챙겨보세요.' },
-      '초밥': { en: 'sushi', desc: '신선한 해산물의 깔끔한 맛. 담백하고 고급스러운 저녁 식사를 원하신다면 추천합니다.', tips: '흰 살 생선부터 붉은 살 생선 순으로 드셔보세요.' },
-      '마라탕': { en: 'malatang', desc: '얼큰하고 매콤한 국물이 생각나는 날. 좋아하는 재료를 듬뿍 넣어 나만의 메뉴를 만들어보세요.', tips: '매운 맛 단계는 신중하게 선택하세요!' },
-      '떡볶이': { en: 'tteokbokki', desc: '매콤달콤한 소스와 쫄깃한 떡의 만남. 한국인의 소울푸드로 기분 전환을 해보세요.', tips: '튀김이나 순대를 소스에 찍어 먹는 것이 국룰입니다.' },
-      '돈까스': { en: 'pork cutlet', desc: '겉바속촉의 정석! 남녀노소 누구나 좋아하는 든든한 일식/경양식 메뉴입니다.', tips: '와사비를 살짝 얹어 먹으면 풍미가 살아납니다.' },
-      '파스타': { en: 'pasta', desc: '우아한 분위기를 내고 싶은 저녁. 크림, 토마토, 오일 등 취향에 맞는 소스를 선택하세요.', tips: '면의 익힘 정도(알 덴테)를 확인해보세요.' },
-      '제육볶음': { en: 'spicy pork', desc: '매콤한 양념에 볶아낸 고기와 흰 쌀밥의 완벽한 조합. 밥도둑이 따로 없습니다.', tips: '상추쌈에 싸 먹으면 더욱 맛있습니다.' },
-      '김치찌개': { en: 'kimchi stew', desc: '한국인의 힘! 푹 익은 김치와 돼지고기가 우러난 깊은 국물 맛을 느껴보세요.', tips: '계란말이나 계란후라이와 찰떡궁합입니다.' },
-      '된장찌개': { en: 'soybean paste stew', desc: '구수하고 담백한 고향의 맛. 속을 편안하게 해주는 건강한 저녁 식사입니다.', tips: '두부와 애호박을 듬뿍 넣어보세요.' },
-      '비빔밥': { en: 'bibimbap', desc: '색색의 나물과 고추장의 조화. 영양 밸런스가 가장 뛰어난 한국의 대표 음식입니다.', tips: '참기름 한 방울이 고소함을 더해줍니다.' },
-      '칼국수': { en: 'kalguksu', desc: '비 오는 날이나 쌀쌀한 날씨에 제격! 쫄깃한 면발과 시원한 국물이 일품입니다.', tips: '겉절이 김치와 함께 드시면 더욱 좋습니다.' },
-      '짜장면': { en: 'jajangmyeon', desc: '이사하는 날만 먹는 게 아니죠! 달콤 짭조름한 춘장 소스의 유혹을 이겨내기 힘듭니다.', tips: '고춧가루를 살짝 뿌려 먹으면 느끼함을 줄여줍니다.' },
-      '짬뽕': { en: 'jjamppong', desc: '해물이 가득 들어간 시원하고 칼칼한 국물. 스트레스를 한 방에 날려버릴 매운맛입니다.', tips: '단무지는 필수입니다.' },
-      '탕수육': { en: 'sweet and sour pork', desc: '부먹? 찍먹? 어떻게 먹어도 맛있는 바삭한 고기 튀김과 달콤한 소스의 만남.', tips: '간장, 식초, 고춧가루 소스에 찍어 드셔보세요.' },
-      '쌀국수': { en: 'pho', desc: '부담 없는 깔끔한 국물. 고수와 레몬즙을 더해 이국적인 풍미를 즐겨보세요.', tips: '해칠 소스와 스리라차 소스를 섞어 고기를 찍어 드세요.' },
-      '스테이크': { en: 'steak', desc: '특별한 날, 나를 위한 선물. 육즙 가득한 고품격 저녁 식사를 즐겨보세요.', tips: '굽기 정도(미디움 등)를 취향에 맞게 선택하세요.' }
-    };
-
-    this.render();
-  }
-
-  connectedCallback() {
-    this.recommendMenu();
-  }
-
-  render() {
-    const style = document.createElement('style');
-    style.textContent = `
-      .wrapper {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        width: 100%;
-        max-width: 600px;
-      }
-      button {
-        padding: 15px 40px;
-        font-size: 1.2rem;
-        font-weight: bold;
-        color: white;
-        background: linear-gradient(145deg, #ff9a9e, #fad0c4);
-        border: none;
-        border-radius: 50px;
-        cursor: pointer;
-        margin-bottom: 30px;
-        box-shadow: 0 0 15px rgba(255, 154, 158, 0.8), 0 0 30px rgba(250, 208, 196, 0.6);
-        transition: all 0.3s ease-in-out;
-      }
-      button:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 0 20px rgba(255, 154, 158, 1), 0 0 40px rgba(250, 208, 196, 0.8);
-      }
-      .result {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 20px;
-        width: 100%;
-        background: rgba(255, 255, 255, 0.05);
-        padding: 25px;
-        border-radius: 30px;
-        border: 1px solid rgba(255, 255, 255, 0.1);
-      }
-      .label {
-        font-size: 1.1rem;
-        opacity: 0.9;
-        font-weight: 500;
-      }
-      .menu-item {
-        padding: 15px 35px;
-        border-radius: 15px;
-        font-size: 2.5rem;
-        font-weight: 900;
-        color: white;
-        text-shadow: 0 2px 4px rgba(0,0,0,0.3);
-        background: linear-gradient(145deg, #f6d365, #fda085);
-        animation: appear 0.5s ease-out forwards;
-      }
-      .description {
-        line-height: 1.6;
-        text-align: center;
-        word-break: keep-all;
-        font-size: 1.1rem;
-        color: var(--text-color);
-        opacity: 0.9;
-      }
-      .tip-box {
-        background: rgba(255, 165, 0, 0.15);
-        padding: 15px 20px;
-        border-radius: 15px;
-        font-size: 0.95rem;
-        border-left: 5px solid #ffa500;
-        width: 100%;
-        box-sizing: border-box;
-      }
-      .tip-title {
-        font-weight: bold;
-        color: #ffa500;
-        margin-bottom: 5px;
-        display: block;
-      }
-      .image-container {
-        width: 100%;
-        height: 350px;
-        border-radius: 20px;
-        overflow: hidden;
-        box-shadow: 0 15px 30px rgba(0,0,0,0.3);
-        margin-top: 10px;
-        background: #333;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        position: relative;
-      }
-      .menu-image {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        opacity: 0;
-        transition: opacity 0.5s ease-in-out;
-      }
-      .menu-image.loaded {
-        opacity: 1;
-      }
-      .loading-text {
-        position: absolute;
-        color: white;
-        font-size: 0.9rem;
-      }
-
-      @keyframes appear {
-        from { opacity: 0; transform: translateY(20px); }
-        to { opacity: 1; transform: translateY(0); }
-      }
-    `;
-
-    this.shadowRoot.innerHTML = '';
-    this.shadowRoot.appendChild(style);
-    
-    const wrapper = document.createElement('div');
-    wrapper.className = 'wrapper';
-    
-    const button = document.createElement('button');
-    button.textContent = this.isEnglish ? 'Show Me Another!' : '오늘 저녁 메뉴 다시 추천받기';
-    button.onclick = () => this.recommendMenu();
-    
-    this.resultContainer = document.createElement('div');
-    this.resultContainer.className = 'result';
-    
-    wrapper.appendChild(button);
-    wrapper.appendChild(this.resultContainer);
-    this.shadowRoot.appendChild(wrapper);
-
-    this.menus = Object.keys(this.keywordMap);
-  }
-
-  recommendMenu() {
-    this.resultContainer.innerHTML = '';
-    
-    const randomIndex = Math.floor(Math.random() * this.menus.length);
-    const selectedMenuName = this.menus[randomIndex];
-    const selectedMenu = this.keywordMap[selectedMenuName];
-    
-    const label = document.createElement('div');
-    label.className = 'label';
-    label.textContent = "AI가 고심해서 고른 오늘 저녁 추천 메뉴는?";
-    
-    const menuDiv = document.createElement('div');
-    menuDiv.className = 'menu-item';
-    menuDiv.textContent = selectedMenuName;
-
-    const descDiv = document.createElement('div');
-    descDiv.className = 'description';
-    descDiv.textContent = selectedMenu.desc;
-
-    const tipBox = document.createElement('div');
-    tipBox.className = 'tip-box';
-    const tipTitle = document.createElement('span');
-    tipTitle.className = 'tip-title';
-    tipTitle.textContent = "💡 더 맛있게 즐기는 팁";
-    tipBox.appendChild(tipTitle);
-    tipBox.insertAdjacentText('beforeend', selectedMenu.tips);
-    
-    const imgContainer = document.createElement('div');
-    imgContainer.className = 'image-container';
-    
-    const loadingText = document.createElement('div');
-    loadingText.className = 'loading-text';
-    loadingText.textContent = '맛있는 이미지 불러오는 중...';
-    
-    const img = document.createElement('img');
-    img.className = 'menu-image';
-    
-    const searchKeyword = selectedMenu.en;
-    img.src = `https://loremflickr.com/600/450/${encodeURIComponent(searchKeyword)},food/all?lock=${Math.floor(Math.random() * 1000)}`;
-    
-    img.onload = () => {
-      img.classList.add('loaded');
-      loadingText.style.display = 'none';
-    };
-    
-    img.onerror = () => {
-      img.src = 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=600&q=60';
-      img.classList.add('loaded');
-      loadingText.style.display = 'none';
-    };
-    
-    imgContainer.appendChild(loadingText);
-    imgContainer.appendChild(img);
-
-    this.resultContainer.appendChild(label);
-    this.resultContainer.appendChild(menuDiv);
-    this.resultContainer.appendChild(imgContainer);
-    this.resultContainer.appendChild(descDiv);
-    this.resultContainer.appendChild(tipBox);
-  }
-}
-
-customElements.define('dinner-recommender', DinnerRecommender);
-
 document.addEventListener('DOMContentLoaded', () => {
+    const allergyList = [
+        "난류", "우유", "메밀", "땅콩", "대두", "밀", "고등어", "게", "새우", "돼지고기", 
+        "복숭아", "토마토", "아황산류", "호두", "닭고기", "쇠고기", "오징어", "조개류", "잣", "전복",
+        "굴", "홍합", "깨", "연어", "망고", "키위", "셀러리", "겨자", "루핀", "연체동물"
+    ];
+
+    const allergyContainer = document.getElementById('allergy-list');
+    allergyList.forEach(item => {
+        const label = document.createElement('label');
+        label.style.display = 'flex';
+        label.style.alignItems = 'center';
+        label.style.gap = '5px';
+        label.style.fontSize = '0.85rem';
+        label.innerHTML = `<input type="checkbox" value="${item}"> ${item}`;
+        allergyContainer.appendChild(label);
+    });
+
+    const generateBtn = document.getElementById('generate-plan');
+    generateBtn.addEventListener('click', generateDietPlan);
+
+    function generateDietPlan() {
+        const gender = document.getElementById('gender').value;
+        const age = document.getElementById('age').value;
+        const height = document.getElementById('height').value;
+        const weight = document.getElementById('weight').value;
+        const country = document.getElementById('country').value;
+        const goal = document.getElementById('goal').value;
+
+        if (!age || !height || !weight) {
+            alert('모든 기본 정보를 입력해주세요!');
+            return;
+        }
+
+        const selectedAllergies = Array.from(document.querySelectorAll('#allergy-list input:checked')).map(cb => cb.value);
+        
+        // 로딩 효과
+        generateBtn.textContent = 'AI가 최적의 식단을 계산 중...';
+        generateBtn.disabled = true;
+
+        setTimeout(() => {
+            renderResult(gender, age, height, weight, country, goal, selectedAllergies);
+            generateBtn.textContent = '맞춤형 일주일 식단 생성하기';
+            generateBtn.disabled = false;
+        }, 1500);
+    }
+
+    function renderResult(gender, age, height, weight, country, goal, allergies) {
+        const resultDiv = document.getElementById('diet-result');
+        resultDiv.style.display = 'block';
+        
+        // 기초대사량(BMR) 계산 (Mifflin-St Jeor 공식)
+        let bmr = (10 * weight) + (6.25 * height) - (5 * age);
+        bmr = (gender === 'male') ? bmr + 5 : bmr - 161;
+        
+        const goalTexts = {
+            diet: "체중 감량 및 체지방 연소",
+            muscle: "근성장 및 근력 증진",
+            liver: "간 수치 개선 및 해독",
+            study: "두뇌 활성화 및 집중력 향상",
+            general: "균형 잡힌 건강 관리"
+        };
+
+        const countryTexts = {
+            korean: "한식 (Korean)",
+            mediterranean: "지중해식 (Mediterranean)",
+            japanese: "일식 (Japanese)",
+            western: "서양식 (Western)"
+        };
+
+        let html = `
+            <div class="form-container" style="margin-top: 30px; border-top: 4px solid #ff9a9e;">
+                <h2 style="text-align: center; color: #ff9a9e;">🗓️ 일주일 맞춤 식단 보고서</h2>
+                <div style="background: rgba(0,0,0,0.05); padding: 15px; border-radius: 10px; margin-bottom: 20px;">
+                    <p><strong>분석 결과:</strong> 귀하의 일일 기초대사량은 약 <strong>${Math.round(bmr)} kcal</strong>입니다.</p>
+                    <p><strong>목표:</strong> ${goalTexts[goal]} | <strong>선호 스타일:</strong> ${countryTexts[country]}</p>
+                    ${allergies.length > 0 ? `<p style="color: #ff6b6b;"><strong>⚠️ 제외 알러지:</strong> ${allergies.join(', ')}</p>` : ''}
+                </div>
+                
+                <div class="diet-grid" style="display: grid; gap: 20px;">
+        `;
+
+        const days = ["월요일", "화요일", "수요일", "목요일", "금요일", "토요일", "일요일"];
+        
+        days.forEach(day => {
+            html += `
+                <div style="padding: 15px; border: 1px solid var(--border-color); border-radius: 15px; background: var(--form-bg);">
+                    <h4 style="margin-top: 0; color: #fda085; border-bottom: 1px solid var(--border-color); padding-bottom: 5px;">${day}</h4>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; font-size: 0.9rem;">
+                        <div><strong>아침:</strong><br>${getMeal(country, goal, 'breakfast')}</div>
+                        <div><strong>점심:</strong><br>${getMeal(country, goal, 'lunch')}</div>
+                        <div><strong>저녁:</strong><br>${getMeal(country, goal, 'dinner')}</div>
+                    </div>
+                </div>
+            `;
+        });
+
+        html += `
+                </div>
+                <div class="tip-box" style="margin-top: 30px;">
+                    <span class="tip-title">💡 전문가의 건강 조언</span>
+                    <p style="font-size: 0.95rem; line-height: 1.6;">${getHealthTip(goal)}</p>
+                </div>
+            </div>
+        `;
+
+        resultDiv.innerHTML = html;
+        resultDiv.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function getMeal(country, goal, time) {
+        // 간단한 예시 데이터 (실제 서비스에서는 더 방대한 DB 필요)
+        const meals = {
+            korean: {
+                diet: ["현미밥, 나물무침", "닭가슴살 샐러드", "두부구이, 현미밥"],
+                muscle: ["소불고기, 흰쌀밥", "닭가슴살 볶음밥", "고등어구이, 단백질 쉐이크"],
+                liver: ["재첩국, 채소 비빔밥", "복지리탕 (맑은국)", "청국장, 잡곡밥"],
+                study: ["견과류 멸치볶음, 잡곡밥", "연어구이, 채소쌈", "전복죽"]
+            },
+            mediterranean: {
+                diet: ["그릭 요거트, 베리류", "병아리콩 샐러드", "구운 생선과 채소"],
+                muscle: ["오트밀, 계란", "그릴드 치킨 피타", "스테이크 샐러드"],
+                liver: ["올리브유 샐러드", "렌틸콩 스프", "구운 연어"],
+                study: ["견과류, 과일", "통곡물 샌드위치", "해산물 파스타"]
+            }
+        };
+
+        const style = meals[country] || meals['korean'];
+        const type = style[goal] || style['diet'];
+        return type[Math.floor(Math.random() * type.length)];
+    }
+
+    function getHealthTip(goal) {
+        const tips = {
+            diet: "다이어트 시에는 단백질 섭취를 늘리고 탄수화물을 줄이는 것이 중요하지만, 통곡물 위주의 복합 탄수화물은 적당량 섭취해야 요요 현상을 방지할 수 있습니다. 수분 섭취를 하루 2L 이상 유지하세요.",
+            muscle: "근성장을 위해서는 강도 높은 운동 후 30분 이내에 단백질을 섭취하는 것이 좋습니다. 또한 충분한 수면(7-8시간)이 근육 세포 재생의 핵심입니다.",
+            liver: "간 건강을 위해서는 술, 과당, 가공식품을 멀리해야 합니다. 브로콜리, 양배추 같은 십자화과 채소는 간의 해독 작용을 돕는 성분이 풍부합니다.",
+            study: "뇌는 포도당을 유일한 에너지원으로 사용합니다. 급격한 혈당 상승을 피하기 위해 현미나 통밀 같은 거친 음식을 드시고, 오메가-3가 풍부한 등푸른 생선과 견과류를 챙겨 드세요."
+        };
+        return tips[goal] || "균형 잡힌 식단과 꾸준한 운동은 건강의 기본입니다. 스트레스를 줄이고 규칙적인 식습관을 가지세요.";
+    }
+
+    // Theme Toggle
     const themeToggleBtn = document.getElementById('theme-toggle');
     const body = document.body;
     if (localStorage.getItem('theme') === 'light') body.classList.add('light-mode');
