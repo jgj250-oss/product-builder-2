@@ -1,58 +1,62 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ko">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="google-adsense-account" content="ca-pub-5008023147519236">
-    <title>Dinner Menu Recommender / 저녁 메뉴 추천</title>
+    <title>VitalPlate: AI Global Nutrition Planner</title>
     <link rel="stylesheet" href="style.css">
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5008023147519236"
      crossorigin="anonymous"></script>
 </head>
 <body>
-    <header style="padding: 20px; text-align: center; background: var(--form-bg); border-bottom: 1px solid var(--border-color);">
-        <nav>
-            <a href="#" style="margin: 0 15px; color: var(--text-color); text-decoration: none; font-weight: bold;">홈</a>
-            <a href="#about" style="margin: 0 15px; color: var(--text-color); text-decoration: none;">서비스 소개</a>
-            <a href="#partnership" style="margin: 0 15px; color: var(--text-color); text-decoration: none;">제휴 문의</a>
-            <a href="#privacy" style="margin: 0 15px; color: var(--text-color); text-decoration: none;">개인정보처리방침</a>
-        </nav>
+    <header style="padding: 10px 40px; display: flex; justify-content: space-between; align-items: center; background: var(--form-bg); border-bottom: 1px solid var(--border-color);">
+        <div style="font-weight: bold; font-size: 1.5rem; background: linear-gradient(145deg, #ff9a9e, #fda085); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">VitalPlate</div>
+        <div style="display: flex; align-items: center; gap: 20px;">
+            <select id="language-select" style="padding: 8px 12px; border-radius: 8px; background: var(--input-bg); color: var(--text-color); border: 1px solid var(--border-color); cursor: pointer;">
+                <option value="ko">한국어</option>
+                <option value="zh">中文 (중국어)</option>
+                <option value="ja">日本語 (일본어)</option>
+                <option value="en">English (미국/영어)</option>
+                <option value="fr">Français (프랑스어)</option>
+                <option value="de">Deutsch (독일어)</option>
+            </select>
+            <button id="theme-toggle" style="padding: 8px 12px; border-radius: 8px; border: none; background-color: #555; color: white; cursor: pointer;">🌓</button>
+        </div>
     </header>
-
-    <button id="theme-toggle" style="position: absolute; top: 80px; right: 20px; padding: 10px 15px; border-radius: 5px; border: none; background-color: #555; color: white; cursor: pointer; z-index: 100;">Toggle Theme</button>
     
     <main>
-        <section id="hero" style="text-align: center; margin-bottom: 40px;">
-            <h1>Global Health Diet Planner</h1>
-            <p style="font-size: 1.2rem; opacity: 0.8; max-width: 700px; margin: 0 auto;">당신의 신체 정보와 목표에 맞춘 전 세계 건강 식단을 경험해보세요. AI가 과학적인 일주일 식단을 설계해드립니다.</p>
+        <section id="hero" style="text-align: center; margin-bottom: 40px; margin-top: 40px;">
+            <h1 id="txt-title" style="font-size: 3.5rem; background: linear-gradient(145deg, #ff9a9e, #fda085); -webkit-background-clip: text; -webkit-text-fill-color: transparent; text-shadow: none; margin-bottom: 10px;">VitalPlate</h1>
+            <p id="txt-subtitle" style="font-size: 1.25rem; opacity: 0.9; max-width: 700px; margin: 0 auto; line-height: 1.6;">AI 기술로 설계된 당신만을 위한 전 세계 건강 식단 솔루션.</p>
         </section>
 
         <section id="planner-container" style="width: 100%; max-width: 800px; margin: 0 auto;">
             <div class="form-container" style="margin-bottom: 40px;">
-                <h3>1. 기본 정보 입력</h3>
+                <h3 id="txt-step1">1. 기본 정보 입력</h3>
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
                     <div class="input-group">
-                        <label>성별</label>
-                        <select id="gender" style="padding: 12px; border-radius: 10px; background: var(--input-bg); color: var(--input-text); border: 1px solid var(--border-color);">
-                            <option value="male">남성</option>
-                            <option value="female">여성</option>
+                        <label id="txt-gender">성별</label>
+                        <select id="gender">
+                            <option value="male" id="txt-male">남성</option>
+                            <option value="female" id="txt-female">여성</option>
                         </select>
                     </div>
                     <div class="input-group">
-                        <label>나이</label>
+                        <label id="txt-age">나이</label>
                         <input type="number" id="age" placeholder="예: 25">
                     </div>
                     <div class="input-group">
-                        <label>키 (cm)</label>
+                        <label id="txt-height">키 (cm)</label>
                         <input type="number" id="height" placeholder="예: 175">
                     </div>
                     <div class="input-group">
-                        <label>체중 (kg)</label>
+                        <label id="txt-weight">체중 (kg)</label>
                         <input type="number" id="weight" placeholder="예: 70">
                     </div>
                     <div class="input-group">
-                        <label>선호 국가 식단</label>
-                        <select id="country" style="padding: 12px; border-radius: 10px; background: var(--input-bg); color: var(--input-text); border: 1px solid var(--border-color);">
+                        <label id="txt-style">선호 국가 식단</label>
+                        <select id="country">
                             <option value="korean">한국식 (한식)</option>
                             <option value="mediterranean">지중해식</option>
                             <option value="japanese">일본식 (일식)</option>
@@ -61,8 +65,8 @@
                         </select>
                     </div>
                     <div class="input-group">
-                        <label>식단 목적</label>
-                        <select id="goal" style="padding: 12px; border-radius: 10px; background: var(--input-bg); color: var(--input-text); border: 1px solid var(--border-color);">
+                        <label id="txt-goal">식단 목적</label>
+                        <select id="goal">
                             <option value="diet">다이어트 & 체중 감량</option>
                             <option value="muscle">근성장 & 벌크업</option>
                             <option value="liver">간 건강 (해독/저자극)</option>
@@ -72,93 +76,29 @@
                     </div>
                 </div>
 
-                <h3 style="margin-top: 30px;">2. 알러지 체크 (해당 항목 선택)</h3>
-                <div id="allergy-list" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 10px; background: var(--input-bg); padding: 20px; border-radius: 15px;">
-                    <!-- JS에서 30가지 알러지 목록 생성 -->
-                </div>
+                <h3 id="txt-step2" style="margin-top: 30px;">2. 알러지 체크</h3>
+                <div id="allergy-list" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 10px; background: var(--input-bg); padding: 20px; border-radius: 15px;"></div>
 
                 <button id="generate-plan" class="submit-btn" style="margin-top: 30px;">맞춤형 일주일 식단 생성하기</button>
             </div>
 
-            <div id="diet-result" style="display: none;">
-                <!-- 식단 결과가 여기에 표시됨 -->
-            </div>
+            <div id="diet-result" style="display: none;"></div>
         </section>
     </main>
 
     <section id="about" style="width: 100%; max-width: 800px; margin: 60px auto; padding: 40px; background-color: var(--form-bg); border-radius: 20px; border: 1px solid var(--border-color);">
-        <h2 style="text-align: center; margin-bottom: 30px;">🍽️ 서비스 소개</h2>
-        <p style="line-height: 1.8; margin-bottom: 20px;">
-            Dinner Menu Recommender는 매일 반복되는 "저녁 메뉴 고민"을 해결하기 위해 탄생했습니다. 저희 서비스는 단순한 메뉴 나열을 넘어, 각 메뉴의 특징과 더 맛있게 즐길 수 있는 팁을 함께 제공하여 사용자에게 실질적인 가치를 전달하고자 합니다.
+        <h2 id="txt-about-title" style="text-align: center; margin-bottom: 30px;">🍽️ VitalPlate 소개</h2>
+        <p id="txt-about-desc" style="line-height: 1.8; margin-bottom: 20px;">
+            VitalPlate는 사용자의 신체 조건과 건강 목표에 최적화된 영양학적 가이드를 제공합니다.
         </p>
-        <ul style="line-height: 1.8;">
-            <li><strong>다양한 메뉴 데이터베이스:</strong> 한식, 일식, 중식, 양식 등 다양한 카테고리의 메뉴를 추천합니다.</li>
-            <li><strong>전문적인 팁 제공:</strong> 각 메뉴를 200% 즐길 수 있는 조합과 팁을 공유합니다.</li>
-            <li><strong>직관적인 UI:</strong> 누구나 쉽게 클릭 한 번으로 메뉴를 추천받을 수 있습니다.</li>
-        </ul>
-    </section>
-
-    <section id="partnership">
-        <div class="form-container">
-            <h2>🤝 제휴 문의</h2>
-            <p>서비스 제휴 및 비즈니스 문의는 아래 양식을 작성해주세요.</p>
-            <form action="https://formspree.io/f/mzdaezva" method="POST">
-                <div class="input-group">
-                    <label for="name">성함 / 기업명</label>
-                    <input type="text" id="name" name="name" placeholder="홍길동" required>
-                </div>
-                <div class="input-group">
-                    <label for="email">이메일 주소</label>
-                    <input type="email" id="email" name="email" placeholder="example@email.com" required>
-                </div>
-                <div class="input-group">
-                    <label for="message">문의 내용</label>
-                    <textarea id="message" name="message" rows="4" placeholder="문의하실 내용을 입력해주세요." required></textarea>
-                </div>
-                <button type="submit" class="submit-btn">문의 보내기</button>
-            </form>
-        </div>
-    </section>
-
-    <section id="comments" style="width: 100%; max-width: 600px; margin-top: 50px; background-color: var(--form-bg); padding: 30px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); border: 1px solid var(--border-color);">
-        <div id="disqus_thread"></div>
-        <script>
-            /**
-            *  RECOMMENDED CONFIGURATION VARIABLES: EDIT AND UNCOMMENT THE SECTION BELOW TO INSERT DYNAMIC VALUES FROM YOUR PLATFORM OR CMS.
-            *  LEARN WHY DEFINING THESE VARIABLES IS IMPORTANT: https://disqus.com/admin/universalcode/#configuration-variables    */
-            /*
-            var disqus_config = function () {
-            this.page.url = PAGE_URL;  // Replace PAGE_URL with your page's canonical URL variable
-            this.page.identifier = PAGE_IDENTIFIER; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
-            };
-            */
-            (function() { // DON'T EDIT BELOW THIS LINE
-            var d = document, s = d.createElement('script');
-            s.src = 'https://product-builder-2-2sb-pages-dev.disqus.com/embed.js';
-            s.setAttribute('data-timestamp', +new Date());
-            (d.head || d.body).appendChild(s);
-            })();
-        </script>
-        <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
     </section>
 
     <footer style="width: 100%; margin-top: 80px; padding: 40px 20px; background: var(--form-bg); border-top: 1px solid var(--border-color); text-align: center;">
-        <div style="max-width: 800px; margin: 0 auto; font-size: 0.9rem; opacity: 0.7; line-height: 1.6;">
-            <div id="privacy" style="margin-bottom: 30px;">
-                <h3 style="margin-bottom: 10px;">개인정보처리방침</h3>
-                <p>본 사이트는 사용자의 별도 개인정보를 수집하거나 저장하지 않습니다. 단, Google AdSense 및 Disqus와 같은 제3자 서비스를 통해 쿠키가 사용될 수 있습니다.</p>
-            </div>
-            <p>&copy; 2026 Dinner Menu Recommender. All rights reserved.</p>
-            <p>본 서비스는 사용자에게 저녁 메뉴 선택의 도움을 주기 위한 목적으로 운영됩니다.</p>
+        <div style="max-width: 800px; margin: 0 auto; font-size: 0.9rem; opacity: 0.7;">
+            <p>&copy; 2026 VitalPlate. All rights reserved.</p>
         </div>
     </footer>
 
     <script src="main.js"></script>
-    <script>
-        // Update H1 based on language
-        if (!navigator.language.startsWith('en')) {
-            document.querySelector('h1').textContent = '오늘 저녁 뭐 먹지?';
-        }
-    </script>
 </body>
 </html>

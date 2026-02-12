@@ -192,6 +192,8 @@ input:focus, select:focus, textarea:focus {
     position: relative;
     max-height: 90vh;
     overflow-y: auto;
+    white-space: pre-wrap;
+    text-align: left;
 }
 
 .close-btn {
