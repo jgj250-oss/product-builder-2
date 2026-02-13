@@ -49,6 +49,15 @@ const plannerRecipePool = dataSource.recipePool;
 const dayNames = ["월", "화", "수", "목", "금", "토", "일"];
 const mealOrder = ["breakfast", "lunch", "dinner"];
 const mealLabel = { breakfast: "아침", lunch: "점심", dinner: "저녁" };
+const mealRatioMap = { breakfast: 0.28, lunch: 0.37, dinner: 0.35 };
+
+const goalConstraints = {
+  diet: { maxOffset: 90, minOffset: 200, minProtein: 22, maxFat: 26 },
+  muscle: { maxOffset: 190, minOffset: 140, minProtein: 30, maxFat: 38 },
+  liver: { maxOffset: 120, minOffset: 180, minProtein: 24, maxFat: 24 },
+  study: { maxOffset: 130, minOffset: 170, minProtein: 22, maxFat: 30 },
+  general: { maxOffset: 150, minOffset: 170, minProtein: 22, maxFat: 32 }
+};
 
 function showRuntimeError(message) {
   const banner = document.getElementById("runtime-error");
@@ -153,6 +162,14 @@ function collectProfile() {
   };
 }
 
+function stableHash(text) {
+  let hash = 0;
+  for (let i = 0; i < text.length; i += 1) {
+    hash = (hash * 31 + text.charCodeAt(i)) >>> 0;
+  }
+  return hash;
+}
+
 function buildNutritionContext(profile) {
   const bmi = profile.weight / ((profile.height / 100) ** 2);
   const bodyType = getBodyType(bmi);
@@ -163,18 +180,31 @@ function buildNutritionContext(profile) {
   const maintenance = bmr * profile.activity;
   const goalProfile = plannerGoalProfiles[profile.goal] || plannerGoalProfiles.general;
   const targetCalories = Math.max(1200, Math.round(maintenance + goalProfile.calorieDelta));
+  const mealTargets = {
+    breakfast: Math.round(targetCalories * mealRatioMap.breakfast),
+    lunch: Math.round(targetCalories * mealRatioMap.lunch),
+    dinner: Math.round(targetCalories * mealRatioMap.dinner)
+  };
+  const seed = stableHash(
+    `${profile.gender}-${profile.age}-${profile.height}-${profile.weight}-${profile.goal}-${profile.situation}-${profile.cuisine}-${profile.dietary}`
+  );
 
   return {
     ...profile,
     bmi,
     bodyType,
     targetCalories,
+    mealTargets,
     goalProfile,
+    seed,
+    constraints: goalConstraints[profile.goal] || goalConstraints.general,
     macroTarget: {
       carb: Math.round((targetCalories * goalProfile.macroRatio.carb) / 4),
       protein: Math.round((targetCalories * goalProfile.macroRatio.protein) / 4),
       fat: Math.round((targetCalories * goalProfile.macroRatio.fat) / 9)
-    }
+    },
+    proteinPerMealTarget: Math.round((targetCalories * goalProfile.macroRatio.protein) / 12),
+    fatPerMealTarget: Math.round((targetCalories * goalProfile.macroRatio.fat) / 27)
   };
 }
 
@@ -186,11 +216,16 @@ function getBodyType(bmi) {
 }
 
 function buildWeeklyPlan(context) {
-  const usedIds = new Set();
+  const history = {
+    recipeIds: new Set(),
+    cuisineCount: {},
+    proteinGroupCount: {},
+    styleCount: {}
+  };
   const weeklyPlan = [];
 
   for (let day = 0; day < 7; day += 1) {
-    const meals = mealOrder.map((mealType) => pickBestRecipe(mealType, context, usedIds));
+    const meals = mealOrder.map((mealType) => pickBestRecipe(mealType, context, history, day));
     const totals = meals.reduce(
       (acc, meal) => {
         acc.calories += meal.calories;
@@ -212,23 +247,73 @@ function buildWeeklyPlan(context) {
   return weeklyPlan;
 }
 
-function pickBestRecipe(mealType, context, usedIds) {
-  let candidates = plannerRecipePool.filter((recipe) => recipe.mealType === mealType && isRecipeAllowed(recipe, context));
+function pickBestRecipe(mealType, context, history, dayIndex) {
+  const strictCandidates = plannerRecipePool.filter(
+    (recipe) => recipe.mealType === mealType && isRecipeAllowed(recipe, context) && passesHardConstraints(recipe, context, mealType)
+  );
+  const allowedCandidates = plannerRecipePool.filter((recipe) => recipe.mealType === mealType && isRecipeAllowed(recipe, context));
+  const fallbackCandidates = plannerRecipePool.filter((recipe) => recipe.mealType === mealType);
 
-  if (!candidates.length) {
-    candidates = plannerRecipePool.filter((recipe) => recipe.mealType === mealType);
-  }
-
+  const candidates = strictCandidates.length ? strictCandidates : allowedCandidates.length ? allowedCandidates : fallbackCandidates;
   const ranked = candidates
     .map((recipe) => ({
       recipe,
-      score: scoreRecipe(recipe, context, usedIds)
+      score: scoreRecipe(recipe, context, history, mealType)
     }))
     .sort((a, b) => b.score - a.score);
 
-  const selected = ranked[0]?.recipe || candidates[0];
-  usedIds.add(selected.id);
+  const topCount = Math.min(5, ranked.length);
+  const topCandidates = ranked.slice(0, topCount);
+  const pickIndex = topCount ? stableHash(`${context.seed}-${dayIndex}-${mealType}`) % topCount : 0;
+  const selected = topCandidates[pickIndex]?.recipe || ranked[0]?.recipe || candidates[0];
+  registerHistory(history, selected);
   return selected;
+}
+
+function passesHardConstraints(recipe, context, mealType) {
+  const target = context.mealTargets[mealType];
+  const rule = context.constraints;
+
+  let maxCal = target + rule.maxOffset;
+  let minCal = Math.max(220, target - rule.minOffset);
+  if (context.bodyType === "underweight") minCal += 55;
+  if (context.bodyType === "obese") maxCal -= 55;
+
+  if (recipe.calories < minCal || recipe.calories > maxCal) return false;
+  if (recipe.protein < rule.minProtein) return false;
+  if (rule.maxFat && recipe.fat > rule.maxFat) return false;
+  return true;
+}
+
+function inferProteinGroup(recipe) {
+  const haystack = `${recipe.title} ${(recipe.ingredients || []).join(" ")}`.toLowerCase();
+  if (/닭|chicken/.test(haystack)) return "chicken";
+  if (/소고기|beef/.test(haystack)) return "beef";
+  if (/돼지|pork/.test(haystack)) return "pork";
+  if (/연어|참치|생선|새우|fish|salmon|tuna|shrimp/.test(haystack)) return "seafood";
+  if (/두부|콩|tofu|bean/.test(haystack)) return "plant";
+  if (/계란|egg/.test(haystack)) return "egg";
+  return "mixed";
+}
+
+function inferStyle(recipe) {
+  const haystack = recipe.title.toLowerCase();
+  if (/샐러드|salad/.test(haystack)) return "salad";
+  if (/국|탕|찌개|죽|soup|stew/.test(haystack)) return "soup";
+  if (/볶음|stir|구이|grill|roast|스테이크/.test(haystack)) return "grill";
+  if (/덮밥|볼|bowl|비빔/.test(haystack)) return "bowl";
+  return "plate";
+}
+
+function registerHistory(history, recipe) {
+  if (!recipe) return;
+  const proteinGroup = inferProteinGroup(recipe);
+  const style = inferStyle(recipe);
+
+  history.recipeIds.add(recipe.id);
+  history.cuisineCount[recipe.cuisine] = (history.cuisineCount[recipe.cuisine] || 0) + 1;
+  history.proteinGroupCount[proteinGroup] = (history.proteinGroupCount[proteinGroup] || 0) + 1;
+  history.styleCount[style] = (history.styleCount[style] || 0) + 1;
 }
 
 function isRecipeAllowed(recipe, context) {
@@ -242,22 +327,39 @@ function isRecipeAllowed(recipe, context) {
   return recipe.dietary.includes(context.dietary);
 }
 
-function scoreRecipe(recipe, context, usedIds) {
+function scoreRecipe(recipe, context, history, mealType) {
   let score = 0;
+  const mealCalTarget = context.mealTargets[mealType];
 
-  if (recipe.tags.includes(context.goal)) score += 18;
-  if (recipe.situations.includes(context.situation)) score += 10;
-  if (recipe.bodyTypes.includes(context.bodyType)) score += 10;
-  if (recipe.dietary.includes(context.dietary)) score += 14;
-  if (context.cuisine !== "any" && recipe.cuisine === context.cuisine) score += 8;
+  if (recipe.tags.includes(context.goal)) score += 24;
+  if (recipe.situations.includes(context.situation)) score += 13;
+  if (recipe.bodyTypes.includes(context.bodyType)) score += 18;
+  if (recipe.dietary.includes(context.dietary)) score += 15;
+  if (context.cuisine !== "any" && recipe.cuisine === context.cuisine) score += 9;
 
   const prepGap = Math.max(0, recipe.prepTime - context.maxPrep);
-  score -= prepGap;
+  score -= prepGap * 1.3;
 
-  const kcalGap = Math.abs(recipe.calories - Math.round(context.targetCalories / 3));
-  score -= Math.round(kcalGap / 30);
+  const kcalGap = Math.abs(recipe.calories - mealCalTarget);
+  score -= Math.round(kcalGap / 12);
+  const proteinGap = Math.abs(recipe.protein - context.proteinPerMealTarget);
+  score -= Math.round(proteinGap / 2);
+  const fatGap = Math.abs(recipe.fat - context.fatPerMealTarget);
+  score -= Math.round(fatGap / 2);
 
-  if (usedIds.has(recipe.id)) score -= 35;
+  if (context.goal === "diet" && recipe.calories > mealCalTarget + 70) score -= 30;
+  if (context.goal === "diet" && recipe.fat > context.fatPerMealTarget + 8) score -= 25;
+  if (context.goal === "muscle" && recipe.protein >= context.proteinPerMealTarget + 6) score += 10;
+  if (context.goal === "liver" && recipe.fat <= context.fatPerMealTarget) score += 8;
+  if (context.bodyType === "underweight" && recipe.calories >= mealCalTarget) score += 6;
+  if (context.bodyType === "obese" && recipe.calories <= mealCalTarget) score += 6;
+
+  const proteinGroup = inferProteinGroup(recipe);
+  const style = inferStyle(recipe);
+  score -= (history.cuisineCount[recipe.cuisine] || 0) * 6;
+  score -= (history.proteinGroupCount[proteinGroup] || 0) * 8;
+  score -= (history.styleCount[style] || 0) * 4;
+  if (history.recipeIds.has(recipe.id)) score -= 80;
 
   return score;
 }
@@ -273,6 +375,8 @@ function renderResult(context, weeklyPlan) {
     obese: "비만"
   }[context.bodyType];
 
+  const uniqueRecipeCount = new Set(weeklyPlan.flatMap((dayPlan) => dayPlan.meals.map((meal) => meal.id))).size;
+
   let html = `
     <article class="summary-card">
       <h2>맞춤 분석 결과</h2>
@@ -284,6 +388,7 @@ function renderResult(context, weeklyPlan) {
       </div>
       <p class="guide">${plannerSituationGuides[context.situation] || "현재 생활 패턴에 맞춰 균형 식단을 추천합니다."}</p>
       <p class="guide">${context.goalProfile.tips.join(" · ")}</p>
+      <p class="guide">주간 다양성: ${uniqueRecipeCount}개 메뉴 조합</p>
     </article>
     <section class="diet-grid">
   `;

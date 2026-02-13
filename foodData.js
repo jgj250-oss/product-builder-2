@@ -399,43 +399,213 @@ function clamp(value, min, max) {
   return Math.max(min, Math.min(max, value));
 }
 
+function mergeUnique(base, extra) {
+  return Array.from(new Set([...(base || []), ...(extra || [])]));
+}
+
+function applyRecipeVariant(recipe, variant) {
+  return {
+    ...recipe,
+    id: `${recipe.id}-${variant.key}`,
+    title: `${recipe.title} (${variant.label})`,
+    prepTime: clamp(recipe.prepTime + (variant.prepDelta || 0), 5, 45),
+    calories: clamp(recipe.calories + (variant.calorieDelta || 0), 220, 980),
+    protein: clamp(recipe.protein + (variant.proteinDelta || 0), 8, 95),
+    carbs: clamp(recipe.carbs + (variant.carbDelta || 0), 8, 170),
+    fat: clamp(recipe.fat + (variant.fatDelta || 0), 3, 70),
+    ingredients: [...recipe.ingredients, ...(variant.ingredientsAdd || [])],
+    steps: [...(variant.stepsAdd || []), ...recipe.steps],
+    tip: `${recipe.tip} ${variant.tipAdd || ""}`.trim(),
+    tags: mergeUnique(recipe.tags, variant.tagsAdd),
+    situations: mergeUnique(recipe.situations, variant.situationsAdd),
+    bodyTypes: mergeUnique(recipe.bodyTypes, variant.bodyTypesAdd),
+    dietary: mergeUnique(recipe.dietary, variant.dietaryAdd)
+  };
+}
+
+function createNutritionVariants(base) {
+  const variants = [
+    {
+      key: "quick",
+      label: "퀵",
+      prepDelta: -4,
+      calorieDelta: -35,
+      proteinDelta: 2,
+      carbDelta: -3,
+      fatDelta: -2,
+      ingredientsAdd: ["손질 채소 1컵"],
+      stepsAdd: ["재료를 미리 손질해 조리 시간을 줄입니다."],
+      tipAdd: "바쁜 일정용 퀵 버전입니다.",
+      tagsAdd: ["general"],
+      situationsAdd: ["busy"]
+    },
+    {
+      key: "power",
+      label: "고단백",
+      prepDelta: 2,
+      calorieDelta: 85,
+      proteinDelta: 7,
+      carbDelta: 3,
+      fatDelta: 2,
+      ingredientsAdd: ["단백질 보강 재료 1회분"],
+      stepsAdd: ["마지막에 단백질 보강 재료를 추가합니다."],
+      tipAdd: "훈련일 고단백 버전입니다.",
+      tagsAdd: ["muscle", "general"],
+      situationsAdd: ["workout"],
+      bodyTypesAdd: ["underweight", "normal"]
+    },
+    {
+      key: "low-sodium",
+      label: "저염",
+      prepDelta: 1,
+      calorieDelta: -20,
+      proteinDelta: 1,
+      carbDelta: 0,
+      fatDelta: -1,
+      ingredientsAdd: ["저염 양념"],
+      stepsAdd: ["소금 대신 허브와 향신 채소로 풍미를 냅니다."],
+      tipAdd: "저염 관리 버전입니다.",
+      tagsAdd: ["liver", "diet"],
+      situationsAdd: ["office", "night"]
+    },
+    {
+      key: "fiber",
+      label: "고섬유",
+      prepDelta: 2,
+      calorieDelta: 15,
+      proteinDelta: 0,
+      carbDelta: 6,
+      fatDelta: 1,
+      ingredientsAdd: ["섬유질 채소 토핑"],
+      stepsAdd: ["채소 토핑을 추가해 식이섬유 밀도를 높입니다."],
+      tipAdd: "포만감 유지 버전입니다.",
+      tagsAdd: ["diet", "study", "general"],
+      situationsAdd: ["office", "student"]
+    },
+    {
+      key: "night-light",
+      label: "야간 라이트",
+      prepDelta: -2,
+      calorieDelta: -60,
+      proteinDelta: 2,
+      carbDelta: -8,
+      fatDelta: -2,
+      ingredientsAdd: ["가벼운 채소 가니시"],
+      stepsAdd: ["늦은 시간 소화를 고려해 간을 약하게 조절합니다."],
+      tipAdd: "야근일 저녁 부담을 줄인 버전입니다.",
+      tagsAdd: ["diet", "liver"],
+      situationsAdd: ["night", "busy"],
+      bodyTypesAdd: ["overweight", "obese"]
+    },
+    {
+      key: "recovery",
+      label: "회복",
+      prepDelta: 2,
+      calorieDelta: 70,
+      proteinDelta: 6,
+      carbDelta: 8,
+      fatDelta: 2,
+      ingredientsAdd: ["회복용 단백질 토핑"],
+      stepsAdd: ["운동 후 회복을 위해 단백질 비중을 높입니다."],
+      tipAdd: "운동 후 회복 버전입니다.",
+      tagsAdd: ["muscle", "general"],
+      situationsAdd: ["workout"],
+      bodyTypesAdd: ["underweight", "normal"]
+    }
+  ];
+
+  return base.flatMap((recipe) => variants.map((variant) => applyRecipeVariant(recipe, variant)));
+}
+
+function createFlavorVariants(base) {
+  const flavorByCuisine = {
+    korean: [
+      { key: "k-sesame", label: "들깨향", ingredientsAdd: ["들깨가루 소량"], stepsAdd: ["마무리로 들깨향을 더합니다."], tipAdd: "고소한 풍미 버전입니다." },
+      { key: "k-fresh", label: "깔끔채소", ingredientsAdd: ["제철 생채소"], stepsAdd: ["아삭한 생채소를 곁들입니다."], tipAdd: "산뜻한 풍미 버전입니다." }
+    ],
+    japanese: [
+      { key: "j-yuzu", label: "유자향", ingredientsAdd: ["유자즙 소량"], stepsAdd: ["유자향을 더해 마무리합니다."], tipAdd: "상큼한 향 버전입니다." },
+      { key: "j-kelp", label: "다시마풍미", ingredientsAdd: ["다시마 우린 물"], stepsAdd: ["육수에 다시마 풍미를 더합니다."], tipAdd: "감칠맛 강화 버전입니다." }
+    ],
+    mediterranean: [
+      { key: "m-herb", label: "올리브허브", ingredientsAdd: ["허브 블렌드"], stepsAdd: ["허브를 더해 지중해풍 향을 강화합니다."], tipAdd: "허브향 강화 버전입니다." },
+      { key: "m-lemon", label: "레몬오레가노", ingredientsAdd: ["레몬 제스트"], stepsAdd: ["레몬 제스트를 마무리로 뿌립니다."], tipAdd: "레몬향 강화 버전입니다." }
+    ],
+    western: [
+      { key: "w-herb", label: "허브레몬", ingredientsAdd: ["허브 레몬 드레싱"], stepsAdd: ["허브 레몬 드레싱으로 맛을 정리합니다."], tipAdd: "밸런스 강화 버전입니다." },
+      { key: "w-basil", label: "바질토핑", ingredientsAdd: ["신선한 바질"], stepsAdd: ["바질 토핑으로 향을 완성합니다."], tipAdd: "향긋한 바질 버전입니다." }
+    ],
+    chinese: [
+      { key: "c-ginger", label: "생강파향", ingredientsAdd: ["생강채", "대파"], stepsAdd: ["생강과 대파 향을 더해 마무리합니다."], tipAdd: "풍미 강화 버전입니다." },
+      { key: "c-garlic", label: "마늘후추", ingredientsAdd: ["통마늘", "후추"], stepsAdd: ["마늘과 후추 향을 올립니다."], tipAdd: "담백한 매운 향 버전입니다." }
+    ]
+  };
+
+  return base.flatMap((recipe) => {
+    const flavors = flavorByCuisine[recipe.cuisine] || [];
+    return flavors.map((flavor) =>
+      applyRecipeVariant(recipe, {
+        ...flavor,
+        key: flavor.key,
+        label: flavor.label,
+        prepDelta: 1,
+        calorieDelta: 10,
+        proteinDelta: 0,
+        carbDelta: 1,
+        fatDelta: 1,
+        tagsAdd: ["general"],
+        situationsAdd: ["office"]
+      })
+    );
+  });
+}
+
+function createSeasonalVariants(base) {
+  const seasonal = [
+    {
+      key: "spring",
+      label: "제철채소",
+      prepDelta: 1,
+      calorieDelta: 20,
+      proteinDelta: 0,
+      carbDelta: 2,
+      fatDelta: 0,
+      ingredientsAdd: ["제철 채소 토핑"],
+      stepsAdd: ["제철 채소를 더해 식감을 보강합니다."],
+      tipAdd: "계절 채소 강화 버전입니다.",
+      tagsAdd: ["general", "study"],
+      situationsAdd: ["office", "student"]
+    },
+    {
+      key: "warm",
+      label: "온기플랜",
+      prepDelta: 2,
+      calorieDelta: 40,
+      proteinDelta: 1,
+      carbDelta: 4,
+      fatDelta: 1,
+      ingredientsAdd: ["따뜻한 수프 또는 국물 곁들임"],
+      stepsAdd: ["따뜻하게 섭취하도록 마지막 온도를 맞춥니다."],
+      tipAdd: "체온 유지 버전입니다.",
+      tagsAdd: ["general", "liver"],
+      situationsAdd: ["night", "office"]
+    }
+  ];
+
+  return base.flatMap((recipe) => seasonal.map((variant) => applyRecipeVariant(recipe, variant)));
+}
+
 function buildRecipePool(base) {
-  const quickVariants = base.map((recipe, index) => ({
-    ...recipe,
-    id: `${recipe.id}-q`,
-    title: `${recipe.title} (퀵)`,
-    prepTime: clamp(recipe.prepTime - 4, 5, 35),
-    calories: clamp(recipe.calories - 35, 250, 900),
-    protein: clamp(recipe.protein + 2, 8, 80),
-    carbs: clamp(recipe.carbs - 4, 8, 140),
-    fat: clamp(recipe.fat - 2, 4, 60),
-    ingredients: [...recipe.ingredients, "냉동 손질채소 1컵"],
-    steps: ["재료를 미리 손질해 조리시간을 줄입니다.", ...recipe.steps],
-    tip: `${recipe.tip} 바쁜 날용 퀵 버전입니다.`,
-    situations: Array.from(new Set([...recipe.situations, "busy"])),
-    sortSeed: index + 100
-  }));
+  const nutritionVariants = createNutritionVariants(base);
+  const flavorVariants = createFlavorVariants(base);
+  const seasonalVariants = createSeasonalVariants(base);
 
-  const powerVariants = base.map((recipe, index) => ({
-    ...recipe,
-    id: `${recipe.id}-p`,
-    title: `${recipe.title} (고단백)`,
-    prepTime: clamp(recipe.prepTime + 2, 5, 40),
-    calories: clamp(recipe.calories + 85, 280, 980),
-    protein: clamp(recipe.protein + 7, 10, 90),
-    carbs: clamp(recipe.carbs + 3, 10, 150),
-    fat: clamp(recipe.fat + 2, 4, 65),
-    ingredients: [...recipe.ingredients, "단백질 보강 재료 1회분"],
-    steps: [...recipe.steps, "마지막에 단백질 보강 재료를 추가해 마무리합니다."],
-    tip: `${recipe.tip} 운동일 고단백 버전입니다.`,
-    tags: Array.from(new Set([...recipe.tags, "muscle", "general"])),
-    situations: Array.from(new Set([...recipe.situations, "workout"])),
-    bodyTypes: Array.from(new Set([...recipe.bodyTypes, "underweight", "normal"])),
-    dietary: recipe.dietary.includes("vegetarian") ? recipe.dietary : Array.from(new Set([...recipe.dietary, "omnivore"])),
-    sortSeed: index + 200
-  }));
-
-  return [...base, ...quickVariants, ...powerVariants];
+  const merged = [...base, ...nutritionVariants, ...flavorVariants, ...seasonalVariants];
+  const dedupMap = new Map();
+  merged.forEach((recipe) => {
+    if (!dedupMap.has(recipe.id)) dedupMap.set(recipe.id, recipe);
+  });
+  return Array.from(dedupMap.values());
 }
 
 const recipePool = buildRecipePool(baseRecipePool);
