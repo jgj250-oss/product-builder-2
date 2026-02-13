@@ -220,7 +220,9 @@ function buildWeeklyPlan(context) {
     recipeIds: new Set(),
     cuisineCount: {},
     proteinGroupCount: {},
-    styleCount: {}
+    styleCount: {},
+    mealRecipeCount: { breakfast: {}, lunch: {}, dinner: {} },
+    mealBaseTitleCount: { breakfast: {}, lunch: {}, dinner: {} }
   };
   const weeklyPlan = [];
 
@@ -248,13 +250,30 @@ function buildWeeklyPlan(context) {
 }
 
 function pickBestRecipe(mealType, context, history, dayIndex) {
+  const unseenRecipeInMeal = (list) => list.filter((recipe) => getMealRepeatCount(history, mealType, recipe.id) === 0);
+  const unseenBaseInMeal = (list) => list.filter((recipe) => getMealBaseRepeatCount(history, mealType, getBaseTitle(recipe.title)) === 0);
+
   const strictCandidates = plannerRecipePool.filter(
     (recipe) => recipe.mealType === mealType && isRecipeAllowed(recipe, context) && passesHardConstraints(recipe, context, mealType)
   );
   const allowedCandidates = plannerRecipePool.filter((recipe) => recipe.mealType === mealType && isRecipeAllowed(recipe, context));
   const fallbackCandidates = plannerRecipePool.filter((recipe) => recipe.mealType === mealType);
 
-  const candidates = strictCandidates.length ? strictCandidates : allowedCandidates.length ? allowedCandidates : fallbackCandidates;
+  let candidates = [];
+  if (strictCandidates.length) {
+    const baseFresh = unseenBaseInMeal(strictCandidates);
+    const recipeFresh = unseenRecipeInMeal(baseFresh);
+    candidates = recipeFresh.length >= 3 ? recipeFresh : baseFresh.length >= 3 ? baseFresh : strictCandidates;
+  } else if (allowedCandidates.length) {
+    const baseFresh = unseenBaseInMeal(allowedCandidates);
+    const recipeFresh = unseenRecipeInMeal(baseFresh);
+    candidates = recipeFresh.length ? recipeFresh : baseFresh.length ? baseFresh : allowedCandidates;
+  } else {
+    const baseFresh = unseenBaseInMeal(fallbackCandidates);
+    const recipeFresh = unseenRecipeInMeal(baseFresh);
+    candidates = recipeFresh.length ? recipeFresh : baseFresh.length ? baseFresh : fallbackCandidates;
+  }
+
   const ranked = candidates
     .map((recipe) => ({
       recipe,
@@ -266,7 +285,7 @@ function pickBestRecipe(mealType, context, history, dayIndex) {
   const topCandidates = ranked.slice(0, topCount);
   const pickIndex = topCount ? stableHash(`${context.seed}-${dayIndex}-${mealType}`) % topCount : 0;
   const selected = topCandidates[pickIndex]?.recipe || ranked[0]?.recipe || candidates[0];
-  registerHistory(history, selected);
+  registerHistory(history, selected, mealType);
   return selected;
 }
 
@@ -305,15 +324,30 @@ function inferStyle(recipe) {
   return "plate";
 }
 
-function registerHistory(history, recipe) {
+function getBaseTitle(title) {
+  return String(title || "").replace(/\s*\([^)]*\)\s*$/g, "").trim();
+}
+
+function getMealRepeatCount(history, mealType, recipeId) {
+  return history.mealRecipeCount[mealType]?.[recipeId] || 0;
+}
+
+function getMealBaseRepeatCount(history, mealType, baseTitle) {
+  return history.mealBaseTitleCount[mealType]?.[baseTitle] || 0;
+}
+
+function registerHistory(history, recipe, mealType) {
   if (!recipe) return;
   const proteinGroup = inferProteinGroup(recipe);
   const style = inferStyle(recipe);
+  const baseTitle = getBaseTitle(recipe.title);
 
   history.recipeIds.add(recipe.id);
   history.cuisineCount[recipe.cuisine] = (history.cuisineCount[recipe.cuisine] || 0) + 1;
   history.proteinGroupCount[proteinGroup] = (history.proteinGroupCount[proteinGroup] || 0) + 1;
   history.styleCount[style] = (history.styleCount[style] || 0) + 1;
+  history.mealRecipeCount[mealType][recipe.id] = getMealRepeatCount(history, mealType, recipe.id) + 1;
+  history.mealBaseTitleCount[mealType][baseTitle] = getMealBaseRepeatCount(history, mealType, baseTitle) + 1;
 }
 
 function isRecipeAllowed(recipe, context) {
@@ -356,10 +390,14 @@ function scoreRecipe(recipe, context, history, mealType) {
 
   const proteinGroup = inferProteinGroup(recipe);
   const style = inferStyle(recipe);
+  const baseTitle = getBaseTitle(recipe.title);
   score -= (history.cuisineCount[recipe.cuisine] || 0) * 6;
   score -= (history.proteinGroupCount[proteinGroup] || 0) * 8;
   score -= (history.styleCount[style] || 0) * 4;
   if (history.recipeIds.has(recipe.id)) score -= 80;
+  score -= getMealRepeatCount(history, mealType, recipe.id) * 140;
+  score -= getMealBaseRepeatCount(history, mealType, baseTitle) * 70;
+  if (getMealRepeatCount(history, mealType, recipe.id) === 0) score += 10;
 
   return score;
 }
