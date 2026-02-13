@@ -35,6 +35,13 @@ const plannerRecipeCatalog = dataSource.recipeCatalog || [];
 const dayNames = ["월", "화", "수", "목", "금", "토", "일"];
 const mealOrder = ["breakfast", "lunch", "dinner"];
 const mealLabel = { breakfast: "아침", lunch: "점심", dinner: "저녁" };
+const cuisineLabel = {
+  korean: "한식",
+  japanese: "일식",
+  mediterranean: "지중해식",
+  western: "서양식",
+  chinese: "중식"
+};
 const mealRatioMap = { breakfast: 0.28, lunch: 0.37, dinner: 0.35 };
 
 const constraintByGoal = {
@@ -424,6 +431,33 @@ function buildWeeklyPlan(context) {
   return weeklyPlan;
 }
 
+function buildMealReason(meal, context) {
+  const reasons = [];
+  const minProtein = context.constraint.minProtein[meal.mealType];
+  const maxFat = context.constraint.maxFat[meal.mealType];
+
+  if (meal.protein >= minProtein) {
+    reasons.push(`단백질 ${meal.protein}g로 ${mealLabel[meal.mealType]} 기준(${minProtein}g) 충족`);
+  } else {
+    reasons.push(`단백질 ${meal.protein}g (권장 ${minProtein}g)`);
+  }
+
+  if (meal.fat <= maxFat) {
+    reasons.push(`지방 ${meal.fat}g로 목표 기준(${maxFat}g) 이내`);
+  }
+  if (meal.sodium <= context.constraint.maxSodiumPerMeal) {
+    reasons.push(`나트륨 ${meal.sodium}mg로 제한(${context.constraint.maxSodiumPerMeal}mg) 이내`);
+  }
+  if (meal.prepTime <= context.maxPrep) {
+    reasons.push(`조리 ${meal.prepTime}분으로 설정(${context.maxPrep}분) 충족`);
+  }
+  if (context.cuisine !== "any" && meal.cuisine === context.cuisine) {
+    reasons.push(`${cuisineLabel[meal.cuisine] || meal.cuisine} 선호 반영`);
+  }
+
+  return reasons.slice(0, 2).join(" · ");
+}
+
 function renderResult(context, weeklyPlan) {
   const resultEl = document.getElementById("diet-result");
   resultEl.style.display = "block";
@@ -436,6 +470,29 @@ function renderResult(context, weeklyPlan) {
   }[context.bodyType];
 
   const uniqueRecipeCount = new Set(weeklyPlan.flatMap((dayPlan) => dayPlan.meals.map((meal) => meal.id))).size;
+  const weeklyTotals = weeklyPlan.reduce(
+    (acc, dayPlan) => {
+      acc.calories += dayPlan.totals.calories;
+      acc.protein += dayPlan.totals.protein;
+      acc.carbs += dayPlan.totals.carbs;
+      acc.fat += dayPlan.totals.fat;
+      acc.sodium += dayPlan.totals.sodium;
+      return acc;
+    },
+    { calories: 0, protein: 0, carbs: 0, fat: 0, sodium: 0 }
+  );
+  const dailyAverageCalories = Math.round(weeklyTotals.calories / 7);
+  const dailyAverageProtein = Math.round(weeklyTotals.protein / 7);
+  const calorieGap = dailyAverageCalories - context.targetCalories;
+
+  const guideByGoal = {
+    diet: { href: "guide-diet.html", label: "체지방 감량 가이드" },
+    muscle: { href: "guide-muscle.html", label: "근육 증가 가이드" },
+    liver: { href: "guide-allergy.html", label: "알레르기·저자극 식단 가이드" },
+    study: { href: "guide-focus.html", label: "집중력 식단 가이드" },
+    general: { href: "guide-office.html", label: "사무직 체형관리 가이드" }
+  };
+  const recommendedGuide = guideByGoal[context.goal] || guideByGoal.general;
 
   let html = `
     <article class="summary-card">
@@ -449,6 +506,8 @@ function renderResult(context, weeklyPlan) {
       <p class="guide">${plannerSituationGuides[context.situation] || "현재 생활 패턴에 맞춘 식단을 추천합니다."}</p>
       <p class="guide">${context.goalProfile.tips.join(" · ")}</p>
       <p class="guide">주간 다양성: ${uniqueRecipeCount}개 실존 레시피</p>
+      <p class="guide">주간 평균: ${dailyAverageCalories} kcal / 단백질 ${dailyAverageProtein}g (목표 대비 ${calorieGap >= 0 ? "+" : ""}${calorieGap} kcal)</p>
+      <p class="guide">심화 읽기: <a href="${recommendedGuide.href}">${recommendedGuide.label}</a></p>
     </article>
     <section class="diet-grid">
   `;
@@ -465,6 +524,7 @@ function renderResult(context, weeklyPlan) {
           </div>
           <strong>${meal.title}</strong>
           <p>${meal.protein}P / ${meal.carbs}C / ${meal.fat}F · Na ${meal.sodium}mg · ${meal.prepTime}분 · ${meal.portionLabel}</p>
+          <p class="meal-reason">${buildMealReason(meal, context)}</p>
         </button>
       `;
     });
