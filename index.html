@@ -1,104 +1,157 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="google-adsense-account" content="ca-pub-5008023147519236">
-    <title>VitalPlate: AI Global Nutrition Planner</title>
-    <link rel="stylesheet" href="style.css">
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5008023147519236"
-     crossorigin="anonymous"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="google-adsense-account" content="ca-pub-5008023147519236">
+  <meta name="description" content="VitalPlate는 체형, 생활 패턴, 알레르기를 반영해 7일 식단과 레시피를 제공하는 맞춤형 식단 웹 서비스입니다.">
+  <title>VitalPlate | 맞춤 식단 플래너</title>
+  <link rel="stylesheet" href="style.css">
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5008023147519236" crossorigin="anonymous"></script>
 </head>
 <body>
-    <header style="padding: 10px 40px; display: flex; justify-content: space-between; align-items: center; background: var(--form-bg); border-bottom: 1px solid var(--border-color);">
-        <div style="font-weight: bold; font-size: 1.5rem; background: linear-gradient(145deg, #ff9a9e, #fda085); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">VitalPlate</div>
-        <div style="display: flex; align-items: center; gap: 20px;">
-            <select id="language-select" style="padding: 8px 12px; border-radius: 8px; background: var(--input-bg); color: var(--text-color); border: 1px solid var(--border-color); cursor: pointer;">
-                <option value="ko">한국어</option>
-                <option value="zh">中文 (중국어)</option>
-                <option value="ja">日本語 (일본어)</option>
-                <option value="en">English (미국/영어)</option>
-                <option value="fr">Français (프랑스어)</option>
-                <option value="de">Deutsch (독일어)</option>
-            </select>
-            <button id="theme-toggle" style="padding: 8px 12px; border-radius: 8px; border: none; background-color: #555; color: white; cursor: pointer;">🌓</button>
-        </div>
-    </header>
-    
-    <main>
-        <section id="hero" style="text-align: center; margin-bottom: 40px; margin-top: 40px;">
-            <h1 id="txt-title" style="font-size: 3.5rem; background: linear-gradient(145deg, #ff9a9e, #fda085); -webkit-background-clip: text; -webkit-text-fill-color: transparent; text-shadow: none; margin-bottom: 10px;">VitalPlate</h1>
-            <p id="txt-subtitle" style="font-size: 1.25rem; opacity: 0.9; max-width: 700px; margin: 0 auto; line-height: 1.6;">AI 기술로 설계된 당신만을 위한 전 세계 건강 식단 솔루션.</p>
-        </section>
+  <header class="topbar">
+    <div class="brand">VitalPlate</div>
+    <nav class="topnav" aria-label="주요 메뉴">
+      <a href="#planner">식단 생성</a>
+      <a href="#editorial">콘텐츠 가이드</a>
+      <a href="#faq">FAQ</a>
+      <a href="about.html">소개</a>
+      <a href="contact.html">문의</a>
+    </nav>
+    <button id="theme-toggle" class="theme-btn" type="button">라이트 모드</button>
+  </header>
 
-        <section id="planner-container" style="width: 100%; max-width: 800px; margin: 0 auto;">
-            <div class="form-container" style="margin-bottom: 40px;">
-                <h3 id="txt-step1">1. 기본 정보 입력</h3>
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
-                    <div class="input-group">
-                        <label id="txt-gender">성별</label>
-                        <select id="gender">
-                            <option value="male" id="txt-male">남성</option>
-                            <option value="female" id="txt-female">여성</option>
-                        </select>
-                    </div>
-                    <div class="input-group">
-                        <label id="txt-age">나이</label>
-                        <input type="number" id="age" placeholder="예: 25">
-                    </div>
-                    <div class="input-group">
-                        <label id="txt-height">키 (cm)</label>
-                        <input type="number" id="height" placeholder="예: 175">
-                    </div>
-                    <div class="input-group">
-                        <label id="txt-weight">체중 (kg)</label>
-                        <input type="number" id="weight" placeholder="예: 70">
-                    </div>
-                    <div class="input-group">
-                        <label id="txt-style">선호 국가 식단</label>
-                        <select id="country">
-                            <option value="korean">한국식 (한식)</option>
-                            <option value="mediterranean">지중해식</option>
-                            <option value="japanese">일본식 (일식)</option>
-                            <option value="chinese">중국식 (중식)</option>
-                            <option value="western">서양식</option>
-                        </select>
-                    </div>
-                    <div class="input-group">
-                        <label id="txt-goal">식단 목적</label>
-                        <select id="goal">
-                            <option value="diet">다이어트 & 체중 감량</option>
-                            <option value="muscle">근성장 & 벌크업</option>
-                            <option value="liver">간 건강 (해독/저자극)</option>
-                            <option value="study">수험생/공부 집중력 향상</option>
-                            <option value="general">일반 건강 유지</option>
-                        </select>
-                    </div>
-                </div>
-
-                <h3 id="txt-step2" style="margin-top: 30px;">2. 알러지 체크</h3>
-                <div id="allergy-list" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 10px; background: var(--input-bg); padding: 20px; border-radius: 15px;"></div>
-
-                <button id="generate-plan" class="submit-btn" style="margin-top: 30px;">맞춤형 일주일 식단 생성하기</button>
-            </div>
-
-            <div id="diet-result" style="display: none;"></div>
-        </section>
-    </main>
-
-    <section id="about" style="width: 100%; max-width: 800px; margin: 60px auto; padding: 40px; background-color: var(--form-bg); border-radius: 20px; border: 1px solid var(--border-color);">
-        <h2 id="txt-about-title" style="text-align: center; margin-bottom: 30px;">🍽️ VitalPlate 소개</h2>
-        <p id="txt-about-desc" style="line-height: 1.8; margin-bottom: 20px;">
-            VitalPlate는 사용자의 신체 조건과 건강 목표에 최적화된 영양학적 가이드를 제공합니다.
-        </p>
+  <main class="layout">
+    <section class="hero">
+      <h1>현실형 맞춤 식단 플래너</h1>
+      <p>체형, 생활 패턴, 목표, 알레르기까지 반영해 7일 식단과 레시피를 생성합니다.</p>
+      <p class="hero-note">본 서비스는 일반 건강 정보 제공 목적이며, 진단 또는 의료행위를 대체하지 않습니다.</p>
     </section>
 
-    <footer style="width: 100%; margin-top: 80px; padding: 40px 20px; background: var(--form-bg); border-top: 1px solid var(--border-color); text-align: center;">
-        <div style="max-width: 800px; margin: 0 auto; font-size: 0.9rem; opacity: 0.7;">
-            <p>&copy; 2026 VitalPlate. All rights reserved.</p>
-        </div>
-    </footer>
+    <section class="form-container" id="planner">
+      <h2>맞춤 식단 생성</h2>
+      <div class="form-grid">
+        <label class="input-group">성별
+          <select id="gender">
+            <option value="male">남성</option>
+            <option value="female">여성</option>
+          </select>
+        </label>
 
-    <script type="module" src="main.js"></script>
+        <label class="input-group">나이
+          <input type="number" id="age" min="14" max="90" placeholder="예: 30">
+        </label>
+
+        <label class="input-group">키 (cm)
+          <input type="number" id="height" min="130" max="220" placeholder="예: 175">
+        </label>
+
+        <label class="input-group">체중 (kg)
+          <input type="number" id="weight" min="35" max="180" placeholder="예: 72">
+        </label>
+
+        <label class="input-group">활동량
+          <select id="activity">
+            <option value="1.2">거의 없음</option>
+            <option value="1.35">가벼운 활동</option>
+            <option value="1.55">주 3~5회 운동</option>
+            <option value="1.75">고강도 운동</option>
+          </select>
+        </label>
+
+        <label class="input-group">목표
+          <select id="goal">
+            <option value="diet">체지방 감량</option>
+            <option value="muscle">근육 증가</option>
+            <option value="liver">간 건강</option>
+            <option value="study">집중력 강화</option>
+            <option value="general">균형 건강</option>
+          </select>
+        </label>
+      </div>
+
+      <p class="advanced-hint">알레르기와 세부 조건은 아래 패널에서 설정할 수 있습니다.</p>
+      <details class="advanced-panel">
+        <summary>추가 조건 (상황/식사성향/알레르기)</summary>
+        <div class="form-grid advanced-grid">
+          <label class="input-group">상황
+            <select id="situation">
+              <option value="office">사무직/좌식 위주</option>
+              <option value="busy">매우 바쁜 일정</option>
+              <option value="student">수험/학습 집중</option>
+              <option value="workout">운동 중심 라이프</option>
+              <option value="night">야근/늦은 귀가</option>
+            </select>
+          </label>
+
+          <label class="input-group">식사 성향
+            <select id="dietary">
+              <option value="omnivore">일반식</option>
+              <option value="vegetarian">채식 위주</option>
+              <option value="pescatarian">해산물 포함</option>
+            </select>
+          </label>
+
+          <label class="input-group">선호 스타일
+            <select id="cuisine">
+              <option value="korean">한식</option>
+              <option value="japanese">일식</option>
+              <option value="mediterranean">지중해식</option>
+              <option value="western">서양식</option>
+              <option value="chinese">중식</option>
+              <option value="any">상관없음</option>
+            </select>
+          </label>
+
+          <label class="input-group">최대 조리 시간
+            <select id="maxPrep">
+              <option value="15">15분</option>
+              <option value="25" selected>25분</option>
+              <option value="35">35분</option>
+            </select>
+          </label>
+        </div>
+
+        <h3>알레르기</h3>
+        <div id="allergy-list" class="allergy-list"></div>
+      </details>
+
+      <button id="generate-plan" class="submit-btn" type="button">7일 식단 생성</button>
+    </section>
+
+    <section id="diet-result" class="result-container" aria-live="polite"></section>
+
+    <section class="info-card" id="editorial">
+      <h2>콘텐츠 가이드: 왜 이 식단이 제안되나요?</h2>
+      <p>VitalPlate는 입력된 키·체중·활동량으로 기초대사량과 목표 열량을 계산하고, 식사 목적(감량/증량/건강 유지)과 생활 상황(야근/수험/운동 중심)을 함께 반영합니다. 추천 과정은 알레르기 제외 필터를 먼저 적용한 뒤, 조리 시간, 끼니당 열량, 단백질 밀도, 식단 다양성 점수 순서로 조합합니다.</p>
+      <p>다이어트 목적일 때는 과도한 저열량 대신 단백질 확보와 지속 가능한 열량 적자를 우선합니다. 근육 증가 목적일 때는 훈련일 고단백 버전을 우선 배치하며, 간 건강 목적일 때는 저염 조리와 저자극 메뉴 비중을 높입니다.</p>
+      <p>본 페이지의 모든 안내는 일반 건강 정보를 기반으로 작성되며, 약물 치료나 질환 진단이 필요한 경우 의료 전문가 상담을 우선해야 합니다. 음식 알레르기가 심한 경우 성분 라벨을 반드시 재확인하세요.</p>
+    </section>
+
+    <section class="info-card" id="faq">
+      <h2>자주 묻는 질문</h2>
+      <h3>Q1. 식단 결과가 매번 동일한가요?</h3>
+      <p>기본 레시피와 퀵/고단백 변형을 함께 사용해 반복도를 낮췄습니다. 동일한 조건에서도 주간 조합이 달라질 수 있습니다.</p>
+      <h3>Q2. 알레르기 항목은 어떻게 반영되나요?</h3>
+      <p>체크된 알레르기와 충돌하는 레시피는 우선 제외됩니다. 대체 레시피가 부족한 경우에도 충돌 점수가 큰 메뉴는 하위로 밀립니다.</p>
+      <h3>Q3. 의료용 식단인가요?</h3>
+      <p>아니요. 일반 건강관리 목적의 정보 서비스입니다. 임산부, 만성질환자, 약물 복용자는 의료진과 상담 후 활용하세요.</p>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="footer-links">
+      <a href="about.html">서비스 소개</a>
+      <a href="privacy.html">개인정보처리방침</a>
+      <a href="terms.html">이용약관</a>
+      <a href="contact.html">문의</a>
+      <a href="ads.txt">ads.txt</a>
+    </div>
+    <p>© 2026 VitalPlate. All rights reserved.</p>
+  </footer>
+
+  <script src="foodData.js" defer></script>
+  <script src="main.js" defer></script>
 </body>
 </html>

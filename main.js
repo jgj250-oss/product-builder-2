@@ -1,159 +1,267 @@
-const API_KEY = '879bd560d1bf4d34971e7541d8d8d748';
+const dataSource = window.VITAL_DATA;
 
-const foodTranslator = {
-    "Chicken": "닭고기", "Salad": "샐러드", "Rice": "밥", "Soup": "국/수프", "Beef": "소고기", "Pork": "돼지고기", 
-    "Fish": "생선", "Salmon": "연어", "Vegetable": "채소", "Noodle": "면", "Fried": "볶음/튀김", "Roasted": "구이",
-    "Steamed": "찜", "Boiled": "삶은", "Healthy": "건강식", "Bowl": "덮밥", "Stew": "찌개", "Bread": "빵",
-    "Tofu": "두부", "Egg": "계란", "Brown Rice": "현미밥", "Kimchi": "김치", "Porridge": "죽"
-};
-
-function translateText(text) {
-    if (!text) return "";
-    let translated = text;
-    Object.keys(foodTranslator).forEach(key => {
-        const regex = new RegExp(key, "gi");
-        translated = translated.replace(regex, foodTranslator[key]);
-    });
-    return translated;
+if (!dataSource) {
+  throw new Error("식단 데이터 로딩에 실패했습니다. foodData.js 로드 순서를 확인해주세요.");
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-    const translations = {
-        ko: { 
-            title: "VitalPlate", subtitle: "AI 맞춤형 글로벌 식단 가이드", step1: "1. 정보 입력", step2: "2. 알러지", btn: "AI 맞춤 식단 생성", 
-            recipeTitle: "상세 정보", breakfast: "☀️ 아침", lunch: "🌤️ 점심", dinner: "🌙 저녁", close: "닫기", 
-            reportTitle: "나의 맞춤 식단 리포트", clickTip: "* 이미지를 클릭하면 상세 레시피를 확인합니다.",
-            bmiLabel: "BMI 지수", statusLabel: "상태", targetCal: "추천 칼로리",
-            underweight: "저체중", normal: "정상", overweight: "과체중", obese: "비만",
-            loading: "최적의 식단을 구성 중입니다...", error: "분석 실패. 다시 시도해주세요."
-        },
-        en: { 
-            title: "VitalPlate", subtitle: "AI-Powered Nutrition Guide", step1: "1. Info", step2: "2. Allergy", btn: "Generate Plan", 
-            recipeTitle: "Meal Details", breakfast: "☀️ Breakfast", lunch: "🌤️ Lunch", dinner: "🌙 Dinner", close: "Close", 
-            reportTitle: "Your Health Report", clickTip: "* Click on a meal for details.",
-            bmiLabel: "BMI", statusLabel: "Status", targetCal: "Daily Calories",
-            underweight: "Underweight", normal: "Normal", overweight: "Overweight", obese: "Obese",
-            loading: "Analyzing and Composing...", error: "Failed to fetch data."
-        }
-    };
+const { allergyOptions, goalProfiles, situationGuides, recipePool } = dataSource;
 
-    let currentLang = 'ko';
-    const langSelect = document.getElementById('language-select');
-    langSelect.addEventListener('change', (e) => { currentLang = e.target.value; updateUILanguage(); });
+const dayNames = ["월", "화", "수", "목", "금", "토", "일"];
+const mealOrder = ["breakfast", "lunch", "dinner"];
+const mealLabel = { breakfast: "아침", lunch: "점심", dinner: "저녁" };
 
-    function updateUILanguage() {
-        const t = translations[currentLang] || translations['ko'];
-        document.getElementById('txt-title').textContent = t.title;
-        document.getElementById('txt-subtitle').textContent = t.subtitle;
-        document.getElementById('txt-step1').textContent = t.step1;
-        document.getElementById('txt-step2').textContent = t.step2;
-        document.getElementById('generate-plan').textContent = t.btn;
+document.addEventListener("DOMContentLoaded", () => {
+  const allergyContainer = document.getElementById("allergy-list");
+  const generateBtn = document.getElementById("generate-plan");
+  const themeBtn = document.getElementById("theme-toggle");
+
+  allergyOptions.forEach((item) => {
+    const label = document.createElement("label");
+    label.className = "allergy-item";
+    label.innerHTML = `<input type="checkbox" value="${item.value}"> ${item.label}`;
+    allergyContainer.appendChild(label);
+  });
+
+  themeBtn.addEventListener("click", () => {
+    document.body.classList.toggle("light-mode");
+    const isLight = document.body.classList.contains("light-mode");
+    themeBtn.textContent = isLight ? "다크 모드" : "라이트 모드";
+  });
+
+  generateBtn.addEventListener("click", () => {
+    const profile = collectProfile();
+    if (!profile) {
+      return;
     }
 
-    const allergyContainer = document.getElementById('allergy-list');
-    const allergies = ["egg", "dairy", "wheat", "peanut", "soy", "seafood", "shellfish", "pork"];
-    allergies.forEach(item => {
-        const label = document.createElement('label');
-        label.className = 'allergy-item';
-        label.innerHTML = `<input type="checkbox" value="${item}"> ${item}`;
-        allergyContainer.appendChild(label);
-    });
-
-    document.getElementById('generate-plan').addEventListener('click', async () => {
-        const t = translations[currentLang] || translations['ko'];
-        const age = parseInt(document.getElementById('age').value);
-        const height = parseInt(document.getElementById('height').value);
-        const weight = parseInt(document.getElementById('weight').value);
-        const gender = document.getElementById('gender').value;
-        const country = document.getElementById('country').value;
-        const goal = document.getElementById('goal').value;
-
-        if (!age || !height || !weight) { alert('Check inputs!'); return; }
-
-        const generateBtn = document.getElementById('generate-plan');
-        generateBtn.textContent = t.loading;
-        generateBtn.disabled = true;
-
-        const bmi = (weight / ((height / 100) ** 2)).toFixed(1);
-        let bmr = (10 * weight) + (6.25 * height) - (5 * age);
-        bmr = (gender === 'male') ? bmr + 5 : bmr - 161;
-        let targetCalories = bmr * 1.3 - (goal === 'diet' ? 500 : (goal === 'muscle' ? -500 : 0));
-
-        try {
-            const cuisine = { korean: 'Korean', japanese: 'Japanese', chinese: 'Chinese', mediterranean: 'Mediterranean', western: 'European' }[country];
-            // 21개의 식단을 한꺼번에 가져옴 (아침7, 점심7, 저녁7)
-            const query = `https://api.spoonacular.com/recipes/complexSearch?apiKey=${API_KEY}&cuisine=${cuisine}&number=21&addRecipeInformation=true&fillIngredients=true&addRecipeNutrition=true&language=${currentLang}`;
-            
-            const res = await fetch(query);
-            const data = await res.json();
-            renderResult(data.results, bmi, targetCalories, t);
-        } catch (e) { alert(t.error); }
-        finally { generateBtn.textContent = t.btn; generateBtn.disabled = false; }
-    });
-
-    function renderResult(recipes, bmi, targetCal, t) {
-        const resultDiv = document.getElementById('diet-result');
-        resultDiv.style.display = 'block';
-        
-        let status = t.normal;
-        if (bmi < 18.5) status = t.underweight;
-        else if (bmi >= 25 && bmi < 30) status = t.overweight;
-        else if (bmi >= 30) status = t.obese;
-
-        let html = `
-            <div class="form-container result-card" style="margin-top: 30px;">
-                <div class="bmi-info" style="display: flex; justify-content: space-around; background: #f8f9fa; padding: 20px; border-radius: 15px; margin-bottom: 30px;">
-                    <div><small>${t.bmiLabel}</small><div style="font-size: 1.5rem; font-weight: bold;">${bmi}</div></div>
-                    <div><small>${t.statusLabel}</small><div style="font-size: 1.5rem; font-weight: bold;">${status}</div></div>
-                    <div><small>${t.targetCal}</small><div style="font-size: 1.5rem; font-weight: bold;">${Math.round(targetCal)} kcal</div></div>
-                </div>
-                <h2 style="text-align: center;">${t.reportTitle}</h2>
-                <div class="diet-grid">
-        `;
-
-        ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].forEach((day, i) => {
-            // 끼니별 데이터 배분 (중복 방지)
-            const meals = [recipes[i] || recipes[0], recipes[i+7] || recipes[1], recipes[i+14] || recipes[2]];
-            const times = [t.breakfast, t.lunch, t.dinner];
-
-            html += `<div class="day-card"><h4>${day}</h4><div class="meal-time">`;
-            meals.forEach((m, idx) => {
-                const title = currentLang === 'ko' ? translateText(m.title) : m.title;
-                html += `
-                    <div class="meal-box" onclick="openFullRecipe(${m.id})">
-                        <div class="meal-tag">${times[idx]}</div>
-                        <img src="${m.image}" class="meal-img">
-                        <div class="meal-name">${title}</div>
-                    </div>`;
-            });
-            html += `</div></div>`;
-        });
-
-        html += `</div></div>`;
-        resultDiv.innerHTML = html;
-        resultDiv.scrollIntoView({ behavior: 'smooth' });
-    }
-
-    window.openFullRecipe = async function(id) {
-        const t = translations[currentLang] || translations['ko'];
-        const res = await fetch(`https://api.spoonacular.com/recipes/${id}/information?apiKey=${API_KEY}&includeNutrition=true`);
-        const r = await res.json();
-        const nutrients = r.nutrition.nutrients.filter(n => ['Calories', 'Protein', 'Fat', 'Carbohydrates'].includes(n.name));
-        
-        const modal = document.createElement('div');
-        modal.className = 'recipe-modal';
-        modal.innerHTML = `
-            <div class="modal-content">
-                <span class="close-btn" onclick="this.parentElement.parentElement.remove()">&times;</span>
-                <h2 style="color: #ff9a9e;">🍳 ${currentLang === 'ko' ? translateText(r.title) : r.title}</h2>
-                <img src="${r.image}" style="width:100%; border-radius:15px; margin:15px 0;">
-                <div style="background:#f8f9fa; padding:15px; border-radius:10px; margin-bottom:20px;">
-                    <ul style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; padding:0; list-style:none;">
-                        ${nutrients.map(n => `<li><strong>${n.name}:</strong> ${n.amount}${n.unit}</li>`).join('')}
-                    </ul>
-                </div>
-                <div style="line-height:1.6;">${r.instructions || 'Check website for details.'}</div>
-            </div>`;
-        document.body.appendChild(modal);
-    };
+    const context = buildNutritionContext(profile);
+    const plan = buildWeeklyPlan(context);
+    renderResult(context, plan);
+  });
 });
+
+function collectProfile() {
+  const age = Number(document.getElementById("age").value);
+  const height = Number(document.getElementById("height").value);
+  const weight = Number(document.getElementById("weight").value);
+
+  if (!age || !height || !weight) {
+    alert("나이, 키, 체중을 모두 입력해주세요.");
+    return null;
+  }
+
+  const allergies = Array.from(document.querySelectorAll("#allergy-list input:checked")).map((el) => el.value);
+
+  return {
+    age,
+    height,
+    weight,
+    gender: document.getElementById("gender").value,
+    activity: Number(document.getElementById("activity").value),
+    goal: document.getElementById("goal").value,
+    situation: document.getElementById("situation").value,
+    dietary: document.getElementById("dietary").value,
+    cuisine: document.getElementById("cuisine").value,
+    maxPrep: Number(document.getElementById("maxPrep").value),
+    allergies
+  };
+}
+
+function buildNutritionContext(profile) {
+  const bmi = profile.weight / ((profile.height / 100) ** 2);
+  const bodyType = getBodyType(bmi);
+
+  let bmr = 10 * profile.weight + 6.25 * profile.height - 5 * profile.age;
+  bmr += profile.gender === "male" ? 5 : -161;
+
+  const maintenance = bmr * profile.activity;
+  const goalProfile = goalProfiles[profile.goal] || goalProfiles.general;
+  const targetCalories = Math.max(1200, Math.round(maintenance + goalProfile.calorieDelta));
+
+  return {
+    ...profile,
+    bmi,
+    bodyType,
+    targetCalories,
+    goalProfile,
+    macroTarget: {
+      carb: Math.round((targetCalories * goalProfile.macroRatio.carb) / 4),
+      protein: Math.round((targetCalories * goalProfile.macroRatio.protein) / 4),
+      fat: Math.round((targetCalories * goalProfile.macroRatio.fat) / 9)
+    }
+  };
+}
+
+function getBodyType(bmi) {
+  if (bmi < 18.5) return "underweight";
+  if (bmi < 25) return "normal";
+  if (bmi < 30) return "overweight";
+  return "obese";
+}
+
+function buildWeeklyPlan(context) {
+  const usedIds = new Set();
+  const weeklyPlan = [];
+
+  for (let day = 0; day < 7; day += 1) {
+    const meals = mealOrder.map((mealType) => pickBestRecipe(mealType, context, usedIds));
+    const totals = meals.reduce(
+      (acc, meal) => {
+        acc.calories += meal.calories;
+        acc.protein += meal.protein;
+        acc.carbs += meal.carbs;
+        acc.fat += meal.fat;
+        return acc;
+      },
+      { calories: 0, protein: 0, carbs: 0, fat: 0 }
+    );
+
+    weeklyPlan.push({
+      day: dayNames[day],
+      meals,
+      totals
+    });
+  }
+
+  return weeklyPlan;
+}
+
+function pickBestRecipe(mealType, context, usedIds) {
+  let candidates = recipePool.filter((recipe) => recipe.mealType === mealType && isRecipeAllowed(recipe, context));
+
+  if (!candidates.length) {
+    candidates = recipePool.filter((recipe) => recipe.mealType === mealType);
+  }
+
+  const ranked = candidates
+    .map((recipe) => ({
+      recipe,
+      score: scoreRecipe(recipe, context, usedIds)
+    }))
+    .sort((a, b) => b.score - a.score);
+
+  const selected = ranked[0]?.recipe || candidates[0];
+  usedIds.add(selected.id);
+  return selected;
+}
+
+function isRecipeAllowed(recipe, context) {
+  const allergyConflict = recipe.allergens.some((item) => context.allergies.includes(item));
+  if (allergyConflict) return false;
+
+  if (context.dietary === "omnivore") {
+    return true;
+  }
+
+  return recipe.dietary.includes(context.dietary);
+}
+
+function scoreRecipe(recipe, context, usedIds) {
+  let score = 0;
+
+  if (recipe.tags.includes(context.goal)) score += 18;
+  if (recipe.situations.includes(context.situation)) score += 10;
+  if (recipe.bodyTypes.includes(context.bodyType)) score += 10;
+  if (recipe.dietary.includes(context.dietary)) score += 14;
+  if (context.cuisine !== "any" && recipe.cuisine === context.cuisine) score += 8;
+
+  const prepGap = Math.max(0, recipe.prepTime - context.maxPrep);
+  score -= prepGap;
+
+  const kcalGap = Math.abs(recipe.calories - Math.round(context.targetCalories / 3));
+  score -= Math.round(kcalGap / 30);
+
+  if (usedIds.has(recipe.id)) score -= 35;
+
+  return score;
+}
+
+function renderResult(context, weeklyPlan) {
+  const resultEl = document.getElementById("diet-result");
+  resultEl.style.display = "block";
+
+  const bodyTypeLabel = {
+    underweight: "저체중",
+    normal: "정상",
+    overweight: "과체중",
+    obese: "비만"
+  }[context.bodyType];
+
+  let html = `
+    <article class="summary-card">
+      <h2>맞춤 분석 결과</h2>
+      <div class="summary-grid">
+        <div><small>BMI</small><strong>${context.bmi.toFixed(1)}</strong></div>
+        <div><small>체형 분류</small><strong>${bodyTypeLabel}</strong></div>
+        <div><small>목표 칼로리</small><strong>${context.targetCalories} kcal</strong></div>
+        <div><small>권장 매크로</small><strong>탄 ${context.macroTarget.carb}g / 단 ${context.macroTarget.protein}g / 지 ${context.macroTarget.fat}g</strong></div>
+      </div>
+      <p class="guide">${situationGuides[context.situation]}</p>
+      <p class="guide">${context.goalProfile.tips.join(" · ")}</p>
+    </article>
+    <section class="diet-grid">
+  `;
+
+  weeklyPlan.forEach((dayPlan) => {
+    html += `<section class="day-card"><h3>${dayPlan.day}요일</h3>`;
+
+    dayPlan.meals.forEach((meal) => {
+      html += `
+        <button class="meal-box" data-recipe-id="${meal.id}" type="button">
+          <div class="meal-header">
+            <span class="meal-tag">${mealLabel[meal.mealType]}</span>
+            <span class="meal-kcal">${meal.calories} kcal</span>
+          </div>
+          <strong>${meal.title}</strong>
+          <p>${meal.protein}P / ${meal.carbs}C / ${meal.fat}F · ${meal.prepTime}분</p>
+        </button>
+      `;
+    });
+
+    html += `
+      <div class="day-total">
+        <span>일일 합계</span>
+        <strong>${dayPlan.totals.calories} kcal</strong>
+        <small>${dayPlan.totals.protein}P / ${dayPlan.totals.carbs}C / ${dayPlan.totals.fat}F</small>
+      </div>
+    </section>`;
+  });
+
+  html += "</section>";
+  resultEl.innerHTML = html;
+
+  resultEl.querySelectorAll(".meal-box").forEach((button) => {
+    button.addEventListener("click", () => {
+      const recipeId = button.dataset.recipeId;
+      const recipe = recipePool.find((item) => item.id === recipeId);
+      if (recipe) openRecipeModal(recipe);
+    });
+  });
+
+  resultEl.scrollIntoView({ behavior: "smooth" });
+}
+
+function openRecipeModal(recipe) {
+  const modal = document.createElement("div");
+  modal.className = "recipe-modal";
+
+  modal.innerHTML = `
+    <div class="modal-content" role="dialog" aria-modal="true">
+      <button class="close-btn" type="button">닫기</button>
+      <h3>${recipe.title}</h3>
+      <div class="modal-meta">${recipe.calories} kcal · 단백질 ${recipe.protein}g · 조리 ${recipe.prepTime}분</div>
+      <h4>재료</h4>
+      <ul>${recipe.ingredients.map((item) => `<li>${item}</li>`).join("")}</ul>
+      <h4>레시피</h4>
+      <ol>${recipe.steps.map((step) => `<li>${step}</li>`).join("")}</ol>
+      <p class="modal-tip">팁: ${recipe.tip}</p>
+    </div>
+  `;
+
+  modal.querySelector(".close-btn").addEventListener("click", () => modal.remove());
+  modal.addEventListener("click", (event) => {
+    if (event.target === modal) modal.remove();
+  });
+
+  document.body.appendChild(modal);
+}
