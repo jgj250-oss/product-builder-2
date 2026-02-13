@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0">
+  <channel>
+    <title>VitalPlate 업데이트</title>
+    <link>https://product-builder-2-2sb.pages.dev/</link>
+    <description>맞춤 식단 플래너 VitalPlate의 주요 페이지 업데이트 피드</description>
+    <language>ko-kr</language>
+    <lastBuildDate>Fri, 13 Feb 2026 12:45:00 +0000</lastBuildDate>
+
+    <item>
+      <title>VitalPlate 메인 페이지</title>
+      <link>https://product-builder-2-2sb.pages.dev/</link>
+      <guid>https://product-builder-2-2sb.pages.dev/</guid>
+      <pubDate>Fri, 13 Feb 2026 12:45:00 +0000</pubDate>
+      <description>체형, 목표, 생활 상황, 알레르기를 반영한 7일 식단 생성 도구</description>
+    </item>
+    <item>
+      <title>서비스 소개</title>
+      <link>https://product-builder-2-2sb.pages.dev/about.html</link>
+      <guid>https://product-builder-2-2sb.pages.dev/about.html</guid>
+      <pubDate>Fri, 13 Feb 2026 12:45:00 +0000</pubDate>
+      <description>VitalPlate 서비스 목적과 운영 원칙 안내</description>
+    </item>
+    <item>
+      <title>개인정보처리방침</title>
+      <link>https://product-builder-2-2sb.pages.dev/privacy.html</link>
+      <guid>https://product-builder-2-2sb.pages.dev/privacy.html</guid>
+      <pubDate>Fri, 13 Feb 2026 12:45:00 +0000</pubDate>
+      <description>개인정보 처리와 쿠키/광고 관련 정책</description>
+    </item>
+    <item>
+      <title>이용약관</title>
+      <link>https://product-builder-2-2sb.pages.dev/terms.html</link>
+      <guid>https://product-builder-2-2sb.pages.dev/terms.html</guid>
+      <pubDate>Fri, 13 Feb 2026 12:45:00 +0000</pubDate>
+      <description>서비스 이용약관과 책임 범위 안내</description>
+    </item>
+    <item>
+      <title>문의</title>
+      <link>https://product-builder-2-2sb.pages.dev/contact.html</link>
+      <guid>https://product-builder-2-2sb.pages.dev/contact.html</guid>
+      <pubDate>Fri, 13 Feb 2026 12:45:00 +0000</pubDate>
+      <description>오류/제안/광고 관련 문의 안내</description>
+    </item>
+  </channel>
+</rss>

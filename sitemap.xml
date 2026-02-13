@@ -1,27 +1,32 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://vitalplate.app/</loc>
+    <loc>https://product-builder-2-2sb.pages.dev/</loc>
+    <lastmod>2026-02-13</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
-    <loc>https://vitalplate.app/about.html</loc>
+    <loc>https://product-builder-2-2sb.pages.dev/about.html</loc>
+    <lastmod>2026-02-13</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://vitalplate.app/privacy.html</loc>
+    <loc>https://product-builder-2-2sb.pages.dev/privacy.html</loc>
+    <lastmod>2026-02-13</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
-    <loc>https://vitalplate.app/terms.html</loc>
+    <loc>https://product-builder-2-2sb.pages.dev/terms.html</loc>
+    <lastmod>2026-02-13</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
-    <loc>https://vitalplate.app/contact.html</loc>
+    <loc>https://product-builder-2-2sb.pages.dev/contact.html</loc>
+    <lastmod>2026-02-13</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>

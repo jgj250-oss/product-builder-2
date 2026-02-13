@@ -1,4 +1,9 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://vitalplate.app/sitemap.xml
+User-agent: Yeti
+Allow: /
+
+Host: product-builder-2-2sb.pages.dev
+Sitemap: https://product-builder-2-2sb.pages.dev/sitemap.xml
+Sitemap: https://product-builder-2-2sb.pages.dev/rss.xml
