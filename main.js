@@ -10,53 +10,64 @@ const fallbackData = {
     { value: "pork", label: "돼지고기" }
   ],
   goalProfiles: {
-    diet: { label: "체지방 감량", calorieDelta: -450, macroRatio: { carb: 0.35, protein: 0.35, fat: 0.3 }, tips: ["단백질 우선", "당류 줄이기"] },
-    muscle: { label: "근육 증가", calorieDelta: 300, macroRatio: { carb: 0.4, protein: 0.35, fat: 0.25 }, tips: ["운동 후 탄단 보충", "수분 충분히"] },
-    liver: { label: "간 건강", calorieDelta: -100, macroRatio: { carb: 0.45, protein: 0.3, fat: 0.25 }, tips: ["저염 조리", "튀김 빈도 줄이기"] },
-    study: { label: "집중력 강화", calorieDelta: 0, macroRatio: { carb: 0.4, protein: 0.3, fat: 0.3 }, tips: ["점심 과식 방지", "오메가3 식품 활용"] },
-    general: { label: "균형 건강", calorieDelta: 0, macroRatio: { carb: 0.45, protein: 0.3, fat: 0.25 }, tips: ["통곡물 늘리기", "채소 다양화"] }
+    diet: { label: "체지방 감량", calorieDelta: -450, macroRatio: { carb: 0.35, protein: 0.35, fat: 0.3 }, tips: ["단백질 우선", "가공식품 줄이기"] },
+    muscle: { label: "근육 증가", calorieDelta: 280, macroRatio: { carb: 0.42, protein: 0.33, fat: 0.25 }, tips: ["운동 후 탄단 보충", "수분 충분히"] },
+    liver: { label: "간 건강", calorieDelta: -120, macroRatio: { carb: 0.43, protein: 0.32, fat: 0.25 }, tips: ["저염 조리", "튀김 빈도 축소"] },
+    study: { label: "집중력 강화", calorieDelta: 0, macroRatio: { carb: 0.4, protein: 0.3, fat: 0.3 }, tips: ["혈당 급등 방지", "오메가3 식품 활용"] },
+    general: { label: "균형 건강", calorieDelta: 0, macroRatio: { carb: 0.45, protein: 0.3, fat: 0.25 }, tips: ["통곡물 비중 확대", "채소 다양화"] }
   },
   situationGuides: {
-    office: "사무직이라면 점심 탄수화물 과다를 줄이고 단백질 간식을 활용하세요.",
-    busy: "바쁜 일정에는 20분 이내 조리 가능한 메뉴를 우선 배치하세요.",
-    student: "수험 기간에는 혈당 급등을 피하기 위해 통곡물 위주로 구성하세요.",
-    workout: "운동일에는 운동 전후 탄수화물과 단백질 타이밍을 맞추세요.",
-    night: "야근일에는 늦은 시간 고지방 식사를 피하고 소화가 쉬운 식사를 권장합니다."
+    office: "사무직은 점심 과식과 오후 졸림을 줄이는 구성이 중요합니다.",
+    busy: "바쁜 일정은 조리시간 20분 내 레시피 비중을 높이세요.",
+    student: "수험 기간은 통곡물, 단백질, 오메가3 식품을 규칙적으로 섭취하세요.",
+    workout: "운동일은 단백질과 탄수화물 타이밍을 맞추는 것이 핵심입니다.",
+    night: "야근일은 늦은 시간 고지방 식사를 피하고 소화 쉬운 메뉴를 선택하세요."
   },
-  recipePool: [
-    { id: "fb1", title: "오트밀 요거트볼", cuisine: "western", mealType: "breakfast", tags: ["diet", "general", "study"], situations: ["office", "busy"], bodyTypes: ["normal", "overweight", "obese"], dietary: ["omnivore", "vegetarian"], allergens: ["dairy", "wheat"], prepTime: 8, calories: 360, protein: 20, carbs: 45, fat: 10, ingredients: ["오트밀", "요거트", "견과류"], steps: ["재료를 담아 섞습니다."], tip: "전날 준비하면 더 편합니다." },
-    { id: "fb2", title: "닭가슴살 주먹밥", cuisine: "korean", mealType: "breakfast", tags: ["muscle", "general"], situations: ["workout", "busy"], bodyTypes: ["underweight", "normal", "overweight"], dietary: ["omnivore"], allergens: ["soy"], prepTime: 14, calories: 430, protein: 32, carbs: 48, fat: 10, ingredients: ["현미밥", "닭가슴살"], steps: ["재료를 섞어 주먹밥으로 만듭니다."], tip: "아침/간식으로 나눠 먹어도 좋습니다." },
-    { id: "fb3", title: "두부 토스트", cuisine: "western", mealType: "breakfast", tags: ["diet", "liver", "general"], situations: ["office", "night"], bodyTypes: ["normal", "overweight", "obese"], dietary: ["vegetarian"], allergens: ["wheat", "soy"], prepTime: 12, calories: 340, protein: 19, carbs: 34, fat: 13, ingredients: ["통밀빵", "두부"], steps: ["두부를 구워 빵 위에 올립니다."], tip: "달걀 대체식으로 좋습니다." },
-    { id: "fl1", title: "병아리콩 샐러드", cuisine: "mediterranean", mealType: "lunch", tags: ["diet", "liver", "general"], situations: ["office", "student"], bodyTypes: ["normal", "overweight", "obese"], dietary: ["vegetarian"], allergens: [], prepTime: 12, calories: 450, protein: 18, carbs: 52, fat: 18, ingredients: ["병아리콩", "채소"], steps: ["채소와 콩을 섞습니다."], tip: "통밀빵을 곁들이면 포만감이 좋습니다." },
-    { id: "fl2", title: "닭가슴살 메밀국수", cuisine: "japanese", mealType: "lunch", tags: ["diet", "muscle", "study"], situations: ["office", "busy", "workout"], bodyTypes: ["normal", "overweight", "obese"], dietary: ["omnivore"], allergens: ["wheat", "soy"], prepTime: 20, calories: 510, protein: 35, carbs: 58, fat: 12, ingredients: ["메밀면", "닭가슴살"], steps: ["면을 삶고 닭가슴살과 함께 담습니다."], tip: "점심 졸림을 줄이는 데 도움이 됩니다." },
-    { id: "fl3", title: "두부비빔밥", cuisine: "korean", mealType: "lunch", tags: ["liver", "general", "diet"], situations: ["office", "night"], bodyTypes: ["normal", "overweight", "obese"], dietary: ["vegetarian", "omnivore"], allergens: ["soy"], prepTime: 18, calories: 470, protein: 24, carbs: 57, fat: 14, ingredients: ["현미밥", "두부", "나물"], steps: ["재료를 밥 위에 올려 비빕니다."], tip: "저염 양념을 권장합니다." },
-    { id: "fd1", title: "연어 구이와 채소", cuisine: "mediterranean", mealType: "dinner", tags: ["liver", "study", "general"], situations: ["office", "night"], bodyTypes: ["normal", "overweight", "obese"], dietary: ["pescatarian", "omnivore"], allergens: ["seafood"], prepTime: 22, calories: 540, protein: 36, carbs: 28, fat: 31, ingredients: ["연어", "브로콜리"], steps: ["연어와 채소를 구워 담습니다."], tip: "야식 대체 저녁으로 적합합니다." },
-    { id: "fd2", title: "닭곰탕과 현미밥", cuisine: "korean", mealType: "dinner", tags: ["general", "muscle", "liver"], situations: ["night", "workout"], bodyTypes: ["underweight", "normal", "overweight"], dietary: ["omnivore"], allergens: [], prepTime: 30, calories: 590, protein: 40, carbs: 54, fat: 17, ingredients: ["닭고기", "현미밥"], steps: ["닭고기를 끓여 곰탕을 만듭니다."], tip: "국물 간을 약하게 조절하세요." },
-    { id: "fd3", title: "두부버섯 전골", cuisine: "korean", mealType: "dinner", tags: ["diet", "liver", "general"], situations: ["night", "busy"], bodyTypes: ["normal", "overweight", "obese"], dietary: ["vegetarian", "omnivore"], allergens: ["soy"], prepTime: 25, calories: 420, protein: 27, carbs: 34, fat: 18, ingredients: ["두부", "버섯"], steps: ["육수에 두부와 버섯을 넣고 끓입니다."], tip: "저녁 과식을 줄이는 데 유리합니다." }
-  ]
+  recipeCatalog: []
 };
 
 const dataSource = window.VITAL_DATA || fallbackData;
-if (!window.VITAL_DATA) {
-  console.warn("foodData.js 로드 실패로 폴백 데이터로 실행합니다.");
-}
-
 const plannerAllergyOptions = dataSource.allergyOptions;
 const plannerGoalProfiles = dataSource.goalProfiles;
 const plannerSituationGuides = dataSource.situationGuides;
-const plannerRecipePool = dataSource.recipePool;
+const plannerRecipeCatalog = dataSource.recipeCatalog || [];
 
 const dayNames = ["월", "화", "수", "목", "금", "토", "일"];
 const mealOrder = ["breakfast", "lunch", "dinner"];
 const mealLabel = { breakfast: "아침", lunch: "점심", dinner: "저녁" };
 const mealRatioMap = { breakfast: 0.28, lunch: 0.37, dinner: 0.35 };
 
-const goalConstraints = {
-  diet: { maxOffset: 90, minOffset: 200, minProtein: 22, maxFat: 26 },
-  muscle: { maxOffset: 190, minOffset: 140, minProtein: 30, maxFat: 38 },
-  liver: { maxOffset: 120, minOffset: 180, minProtein: 24, maxFat: 24 },
-  study: { maxOffset: 130, minOffset: 170, minProtein: 22, maxFat: 30 },
-  general: { maxOffset: 150, minOffset: 170, minProtein: 22, maxFat: 32 }
+const constraintByGoal = {
+  diet: {
+    kcalRange: [0.72, 1.12],
+    minProtein: { breakfast: 20, lunch: 28, dinner: 30 },
+    maxFat: { breakfast: 18, lunch: 26, dinner: 26 },
+    maxSodiumPerMeal: 760
+  },
+  muscle: {
+    kcalRange: [0.85, 1.25],
+    minProtein: { breakfast: 24, lunch: 34, dinner: 34 },
+    maxFat: { breakfast: 24, lunch: 36, dinner: 36 },
+    maxSodiumPerMeal: 900
+  },
+  liver: {
+    kcalRange: [0.75, 1.15],
+    minProtein: { breakfast: 22, lunch: 28, dinner: 30 },
+    maxFat: { breakfast: 16, lunch: 24, dinner: 24 },
+    maxSodiumPerMeal: 650
+  },
+  study: {
+    kcalRange: [0.75, 1.18],
+    minProtein: { breakfast: 20, lunch: 26, dinner: 28 },
+    maxFat: { breakfast: 20, lunch: 30, dinner: 30 },
+    maxSodiumPerMeal: 820
+  },
+  general: {
+    kcalRange: [0.74, 1.2],
+    minProtein: { breakfast: 20, lunch: 26, dinner: 28 },
+    maxFat: { breakfast: 20, lunch: 32, dinner: 32 },
+    maxSodiumPerMeal: 850
+  }
 };
 
 function showRuntimeError(message) {
@@ -116,15 +127,14 @@ document.addEventListener("DOMContentLoaded", () => {
   generateBtn.addEventListener("click", () => {
     try {
       const profile = collectProfile();
-      if (!profile) {
-        return;
-      }
+      if (!profile) return;
       setFormError("");
 
       const context = buildNutritionContext(profile);
       const plan = buildWeeklyPlan(context);
       renderResult(context, plan);
     } catch (error) {
+      setFormError(error.message || "현재 조건에 맞는 식단 구성이 어렵습니다. 조건을 완화해 주세요.");
       showRuntimeError("식단 생성 중 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.");
       console.error(error);
     }
@@ -170,6 +180,48 @@ function stableHash(text) {
   return hash;
 }
 
+function getBodyType(bmi) {
+  if (bmi < 18.5) return "underweight";
+  if (bmi < 25) return "normal";
+  if (bmi < 30) return "overweight";
+  return "obese";
+}
+
+function getConstraint(goal, bodyType) {
+  const base = constraintByGoal[goal] || constraintByGoal.general;
+  const next = {
+    kcalRange: [...base.kcalRange],
+    minProtein: { ...base.minProtein },
+    maxFat: { ...base.maxFat },
+    maxSodiumPerMeal: base.maxSodiumPerMeal
+  };
+
+  if (bodyType === "underweight") {
+    next.kcalRange[0] += 0.08;
+    next.kcalRange[1] += 0.08;
+    next.minProtein.breakfast += 2;
+    next.minProtein.lunch += 2;
+    next.minProtein.dinner += 2;
+  }
+  if (bodyType === "overweight") {
+    next.kcalRange[0] -= 0.03;
+    next.kcalRange[1] -= 0.07;
+    next.maxFat.breakfast -= 2;
+    next.maxFat.lunch -= 2;
+    next.maxFat.dinner -= 2;
+  }
+  if (bodyType === "obese") {
+    next.kcalRange[0] -= 0.06;
+    next.kcalRange[1] -= 0.12;
+    next.maxFat.breakfast -= 4;
+    next.maxFat.lunch -= 4;
+    next.maxFat.dinner -= 4;
+    next.maxSodiumPerMeal -= 80;
+  }
+
+  return next;
+}
+
 function buildNutritionContext(profile) {
   const bmi = profile.weight / ((profile.height / 100) ** 2);
   const bodyType = getBodyType(bmi);
@@ -180,11 +232,13 @@ function buildNutritionContext(profile) {
   const maintenance = bmr * profile.activity;
   const goalProfile = plannerGoalProfiles[profile.goal] || plannerGoalProfiles.general;
   const targetCalories = Math.max(1200, Math.round(maintenance + goalProfile.calorieDelta));
+
   const mealTargets = {
     breakfast: Math.round(targetCalories * mealRatioMap.breakfast),
     lunch: Math.round(targetCalories * mealRatioMap.lunch),
     dinner: Math.round(targetCalories * mealRatioMap.dinner)
   };
+
   const seed = stableHash(
     `${profile.gender}-${profile.age}-${profile.height}-${profile.weight}-${profile.goal}-${profile.situation}-${profile.cuisine}-${profile.dietary}`
   );
@@ -194,212 +248,180 @@ function buildNutritionContext(profile) {
     bmi,
     bodyType,
     targetCalories,
-    mealTargets,
     goalProfile,
+    mealTargets,
     seed,
-    constraints: goalConstraints[profile.goal] || goalConstraints.general,
+    constraint: getConstraint(profile.goal, bodyType),
     macroTarget: {
       carb: Math.round((targetCalories * goalProfile.macroRatio.carb) / 4),
       protein: Math.round((targetCalories * goalProfile.macroRatio.protein) / 4),
       fat: Math.round((targetCalories * goalProfile.macroRatio.fat) / 9)
-    },
-    proteinPerMealTarget: Math.round((targetCalories * goalProfile.macroRatio.protein) / 12),
-    fatPerMealTarget: Math.round((targetCalories * goalProfile.macroRatio.fat) / 27)
+    }
   };
 }
 
-function getBodyType(bmi) {
-  if (bmi < 18.5) return "underweight";
-  if (bmi < 25) return "normal";
-  if (bmi < 30) return "overweight";
-  return "obese";
+function isDietaryAllowed(recipe, dietary) {
+  if (dietary === "omnivore") return true;
+  if (dietary === "vegetarian") return recipe.dietary.includes("vegetarian");
+  if (dietary === "pescatarian") return recipe.dietary.includes("pescatarian") || recipe.dietary.includes("vegetarian");
+  return false;
+}
+
+function isRecipeAllowed(recipe, context) {
+  if (!isDietaryAllowed(recipe, context.dietary)) return false;
+  if (recipe.allergens.some((item) => context.allergies.includes(item))) return false;
+  return true;
+}
+
+function getPortionOptions(goal, bodyType) {
+  if (goal === "muscle" || bodyType === "underweight") return [1.0, 1.15, 1.3];
+  if (goal === "diet" || bodyType === "obese") return [0.8, 0.9, 1.0];
+  return [0.9, 1.0, 1.1];
+}
+
+function getMealRepeatCount(history, mealType, recipeId) {
+  return history.mealRecipeCount[mealType][recipeId] || 0;
+}
+
+function getProteinRepeatCount(history, mealType, proteinGroup) {
+  return history.mealProteinGroupCount[mealType][proteinGroup] || 0;
+}
+
+function registerHistory(history, mealType, meal) {
+  history.recipeIds.add(meal.id);
+  history.recipeCount[meal.id] = (history.recipeCount[meal.id] || 0) + 1;
+  history.mealRecipeCount[mealType][meal.id] = getMealRepeatCount(history, mealType, meal.id) + 1;
+  history.mealProteinGroupCount[mealType][meal.proteinGroup] = getProteinRepeatCount(history, mealType, meal.proteinGroup) + 1;
+  history.cuisineCount[meal.cuisine] = (history.cuisineCount[meal.cuisine] || 0) + 1;
+}
+
+function evaluateCandidate(recipe, portion, context, mealType, history, strict) {
+  const scaled = {
+    calories: Math.round(recipe.nutrition.calories * portion),
+    protein: Math.round(recipe.nutrition.protein * portion),
+    carbs: Math.round(recipe.nutrition.carbs * portion),
+    fat: Math.round(recipe.nutrition.fat * portion),
+    sodium: Math.round(recipe.nutrition.sodium * portion)
+  };
+
+  const mealTarget = context.mealTargets[mealType];
+  const rule = context.constraint;
+  const minCal = Math.round(mealTarget * rule.kcalRange[0]);
+  const maxCal = Math.round(mealTarget * rule.kcalRange[1]);
+  const minProtein = rule.minProtein[mealType];
+  const maxFat = rule.maxFat[mealType];
+  const maxSodium = rule.maxSodiumPerMeal;
+
+  if (strict) {
+    if (scaled.calories < minCal || scaled.calories > maxCal) return null;
+    if (scaled.protein < minProtein) return null;
+    if (scaled.fat > maxFat) return null;
+    if (scaled.sodium > maxSodium) return null;
+    if (getMealRepeatCount(history, mealType, recipe.id) > 0) return null;
+  }
+
+  let score = 220;
+  score -= Math.abs(scaled.calories - mealTarget) / 6;
+  score -= Math.abs(scaled.protein - minProtein) * 1.6;
+  if (scaled.fat > maxFat) score -= (scaled.fat - maxFat) * 3.5;
+  if (scaled.sodium > maxSodium) score -= (scaled.sodium - maxSodium) / 18;
+
+  if (recipe.goals.includes(context.goal)) score += 20;
+  if (recipe.situations.includes(context.situation)) score += 11;
+  if (context.cuisine !== "any" && recipe.cuisine === context.cuisine) score += 8;
+  if (recipe.prepTime <= context.maxPrep) score += 8;
+  else score -= (recipe.prepTime - context.maxPrep) * 2;
+
+  score -= getMealRepeatCount(history, mealType, recipe.id) * 120;
+  score -= getProteinRepeatCount(history, mealType, recipe.proteinGroup) * 22;
+  score -= (history.cuisineCount[recipe.cuisine] || 0) * 6;
+  if (!history.recipeIds.has(recipe.id)) score += 9;
+
+  return {
+    score,
+    meal: {
+      id: recipe.id,
+      title: recipe.title,
+      mealType,
+      cuisine: recipe.cuisine,
+      proteinGroup: recipe.proteinGroup,
+      prepTime: recipe.prepTime,
+      portion,
+      portionLabel: `${Math.round(portion * 100)}%`,
+      calories: scaled.calories,
+      protein: scaled.protein,
+      carbs: scaled.carbs,
+      fat: scaled.fat,
+      sodium: scaled.sodium,
+      ingredients: recipe.ingredients,
+      steps: recipe.steps,
+      tip: recipe.tip
+    }
+  };
+}
+
+function chooseBestCandidate(recipes, context, mealType, history, dayIndex) {
+  const portions = getPortionOptions(context.goal, context.bodyType);
+  const strictResults = [];
+  const relaxedResults = [];
+
+  recipes.forEach((recipe) => {
+    portions.forEach((portion) => {
+      const strictCandidate = evaluateCandidate(recipe, portion, context, mealType, history, true);
+      if (strictCandidate) strictResults.push(strictCandidate);
+      const relaxedCandidate = evaluateCandidate(recipe, portion, context, mealType, history, false);
+      if (relaxedCandidate) relaxedResults.push(relaxedCandidate);
+    });
+  });
+
+  const targetList = strictResults.length ? strictResults : relaxedResults;
+  if (!targetList.length) return null;
+
+  targetList.sort((a, b) => b.score - a.score);
+  const topCount = Math.min(4, targetList.length);
+  const top = targetList.slice(0, topCount);
+  const pickIndex = stableHash(`${context.seed}-${dayIndex}-${mealType}-${topCount}`) % topCount;
+  return top[pickIndex].meal;
 }
 
 function buildWeeklyPlan(context) {
   const history = {
     recipeIds: new Set(),
+    recipeCount: {},
     cuisineCount: {},
-    proteinGroupCount: {},
-    styleCount: {},
     mealRecipeCount: { breakfast: {}, lunch: {}, dinner: {} },
-    mealBaseTitleCount: { breakfast: {}, lunch: {}, dinner: {} }
+    mealProteinGroupCount: { breakfast: {}, lunch: {}, dinner: {} }
   };
+
   const weeklyPlan = [];
 
   for (let day = 0; day < 7; day += 1) {
-    const meals = mealOrder.map((mealType) => pickBestRecipe(mealType, context, history, day));
+    const meals = mealOrder.map((mealType) => {
+      const candidates = plannerRecipeCatalog.filter((recipe) => recipe.mealType === mealType && isRecipeAllowed(recipe, context));
+      const chosen = chooseBestCandidate(candidates, context, mealType, history, day);
+      if (!chosen) {
+        throw new Error(`적합한 ${mealType} 후보가 없습니다.`);
+      }
+      registerHistory(history, mealType, chosen);
+      return chosen;
+    });
+
     const totals = meals.reduce(
       (acc, meal) => {
         acc.calories += meal.calories;
         acc.protein += meal.protein;
         acc.carbs += meal.carbs;
         acc.fat += meal.fat;
+        acc.sodium += meal.sodium;
         return acc;
       },
-      { calories: 0, protein: 0, carbs: 0, fat: 0 }
+      { calories: 0, protein: 0, carbs: 0, fat: 0, sodium: 0 }
     );
 
-    weeklyPlan.push({
-      day: dayNames[day],
-      meals,
-      totals
-    });
+    weeklyPlan.push({ day: dayNames[day], meals, totals });
   }
 
   return weeklyPlan;
-}
-
-function pickBestRecipe(mealType, context, history, dayIndex) {
-  const unseenRecipeInMeal = (list) => list.filter((recipe) => getMealRepeatCount(history, mealType, recipe.id) === 0);
-  const unseenBaseInMeal = (list) => list.filter((recipe) => getMealBaseRepeatCount(history, mealType, getBaseTitle(recipe.title)) === 0);
-
-  const strictCandidates = plannerRecipePool.filter(
-    (recipe) => recipe.mealType === mealType && isRecipeAllowed(recipe, context) && passesHardConstraints(recipe, context, mealType)
-  );
-  const allowedCandidates = plannerRecipePool.filter((recipe) => recipe.mealType === mealType && isRecipeAllowed(recipe, context));
-  const fallbackCandidates = plannerRecipePool.filter((recipe) => recipe.mealType === mealType);
-
-  let candidates = [];
-  if (strictCandidates.length) {
-    const baseFresh = unseenBaseInMeal(strictCandidates);
-    const recipeFresh = unseenRecipeInMeal(baseFresh);
-    candidates = recipeFresh.length >= 3 ? recipeFresh : baseFresh.length >= 3 ? baseFresh : strictCandidates;
-  } else if (allowedCandidates.length) {
-    const baseFresh = unseenBaseInMeal(allowedCandidates);
-    const recipeFresh = unseenRecipeInMeal(baseFresh);
-    candidates = recipeFresh.length ? recipeFresh : baseFresh.length ? baseFresh : allowedCandidates;
-  } else {
-    const baseFresh = unseenBaseInMeal(fallbackCandidates);
-    const recipeFresh = unseenRecipeInMeal(baseFresh);
-    candidates = recipeFresh.length ? recipeFresh : baseFresh.length ? baseFresh : fallbackCandidates;
-  }
-
-  const ranked = candidates
-    .map((recipe) => ({
-      recipe,
-      score: scoreRecipe(recipe, context, history, mealType)
-    }))
-    .sort((a, b) => b.score - a.score);
-
-  const topCount = Math.min(5, ranked.length);
-  const topCandidates = ranked.slice(0, topCount);
-  const pickIndex = topCount ? stableHash(`${context.seed}-${dayIndex}-${mealType}`) % topCount : 0;
-  const selected = topCandidates[pickIndex]?.recipe || ranked[0]?.recipe || candidates[0];
-  registerHistory(history, selected, mealType);
-  return selected;
-}
-
-function passesHardConstraints(recipe, context, mealType) {
-  const target = context.mealTargets[mealType];
-  const rule = context.constraints;
-
-  let maxCal = target + rule.maxOffset;
-  let minCal = Math.max(220, target - rule.minOffset);
-  if (context.bodyType === "underweight") minCal += 55;
-  if (context.bodyType === "obese") maxCal -= 55;
-
-  if (recipe.calories < minCal || recipe.calories > maxCal) return false;
-  if (recipe.protein < rule.minProtein) return false;
-  if (rule.maxFat && recipe.fat > rule.maxFat) return false;
-  return true;
-}
-
-function inferProteinGroup(recipe) {
-  const haystack = `${recipe.title} ${(recipe.ingredients || []).join(" ")}`.toLowerCase();
-  if (/닭|chicken/.test(haystack)) return "chicken";
-  if (/소고기|beef/.test(haystack)) return "beef";
-  if (/돼지|pork/.test(haystack)) return "pork";
-  if (/연어|참치|생선|새우|fish|salmon|tuna|shrimp/.test(haystack)) return "seafood";
-  if (/두부|콩|tofu|bean/.test(haystack)) return "plant";
-  if (/계란|egg/.test(haystack)) return "egg";
-  return "mixed";
-}
-
-function inferStyle(recipe) {
-  const haystack = recipe.title.toLowerCase();
-  if (/샐러드|salad/.test(haystack)) return "salad";
-  if (/국|탕|찌개|죽|soup|stew/.test(haystack)) return "soup";
-  if (/볶음|stir|구이|grill|roast|스테이크/.test(haystack)) return "grill";
-  if (/덮밥|볼|bowl|비빔/.test(haystack)) return "bowl";
-  return "plate";
-}
-
-function getBaseTitle(title) {
-  return String(title || "").replace(/\s*\([^)]*\)\s*$/g, "").trim();
-}
-
-function getMealRepeatCount(history, mealType, recipeId) {
-  return history.mealRecipeCount[mealType]?.[recipeId] || 0;
-}
-
-function getMealBaseRepeatCount(history, mealType, baseTitle) {
-  return history.mealBaseTitleCount[mealType]?.[baseTitle] || 0;
-}
-
-function registerHistory(history, recipe, mealType) {
-  if (!recipe) return;
-  const proteinGroup = inferProteinGroup(recipe);
-  const style = inferStyle(recipe);
-  const baseTitle = getBaseTitle(recipe.title);
-
-  history.recipeIds.add(recipe.id);
-  history.cuisineCount[recipe.cuisine] = (history.cuisineCount[recipe.cuisine] || 0) + 1;
-  history.proteinGroupCount[proteinGroup] = (history.proteinGroupCount[proteinGroup] || 0) + 1;
-  history.styleCount[style] = (history.styleCount[style] || 0) + 1;
-  history.mealRecipeCount[mealType][recipe.id] = getMealRepeatCount(history, mealType, recipe.id) + 1;
-  history.mealBaseTitleCount[mealType][baseTitle] = getMealBaseRepeatCount(history, mealType, baseTitle) + 1;
-}
-
-function isRecipeAllowed(recipe, context) {
-  const allergyConflict = recipe.allergens.some((item) => context.allergies.includes(item));
-  if (allergyConflict) return false;
-
-  if (context.dietary === "omnivore") {
-    return true;
-  }
-
-  return recipe.dietary.includes(context.dietary);
-}
-
-function scoreRecipe(recipe, context, history, mealType) {
-  let score = 0;
-  const mealCalTarget = context.mealTargets[mealType];
-
-  if (recipe.tags.includes(context.goal)) score += 24;
-  if (recipe.situations.includes(context.situation)) score += 13;
-  if (recipe.bodyTypes.includes(context.bodyType)) score += 18;
-  if (recipe.dietary.includes(context.dietary)) score += 15;
-  if (context.cuisine !== "any" && recipe.cuisine === context.cuisine) score += 9;
-
-  const prepGap = Math.max(0, recipe.prepTime - context.maxPrep);
-  score -= prepGap * 1.3;
-
-  const kcalGap = Math.abs(recipe.calories - mealCalTarget);
-  score -= Math.round(kcalGap / 12);
-  const proteinGap = Math.abs(recipe.protein - context.proteinPerMealTarget);
-  score -= Math.round(proteinGap / 2);
-  const fatGap = Math.abs(recipe.fat - context.fatPerMealTarget);
-  score -= Math.round(fatGap / 2);
-
-  if (context.goal === "diet" && recipe.calories > mealCalTarget + 70) score -= 30;
-  if (context.goal === "diet" && recipe.fat > context.fatPerMealTarget + 8) score -= 25;
-  if (context.goal === "muscle" && recipe.protein >= context.proteinPerMealTarget + 6) score += 10;
-  if (context.goal === "liver" && recipe.fat <= context.fatPerMealTarget) score += 8;
-  if (context.bodyType === "underweight" && recipe.calories >= mealCalTarget) score += 6;
-  if (context.bodyType === "obese" && recipe.calories <= mealCalTarget) score += 6;
-
-  const proteinGroup = inferProteinGroup(recipe);
-  const style = inferStyle(recipe);
-  const baseTitle = getBaseTitle(recipe.title);
-  score -= (history.cuisineCount[recipe.cuisine] || 0) * 6;
-  score -= (history.proteinGroupCount[proteinGroup] || 0) * 8;
-  score -= (history.styleCount[style] || 0) * 4;
-  if (history.recipeIds.has(recipe.id)) score -= 80;
-  score -= getMealRepeatCount(history, mealType, recipe.id) * 140;
-  score -= getMealBaseRepeatCount(history, mealType, baseTitle) * 70;
-  if (getMealRepeatCount(history, mealType, recipe.id) === 0) score += 10;
-
-  return score;
 }
 
 function renderResult(context, weeklyPlan) {
@@ -424,9 +446,9 @@ function renderResult(context, weeklyPlan) {
         <div><small>목표 칼로리</small><strong>${context.targetCalories} kcal</strong></div>
         <div><small>권장 매크로</small><strong>탄 ${context.macroTarget.carb}g / 단 ${context.macroTarget.protein}g / 지 ${context.macroTarget.fat}g</strong></div>
       </div>
-      <p class="guide">${plannerSituationGuides[context.situation] || "현재 생활 패턴에 맞춰 균형 식단을 추천합니다."}</p>
+      <p class="guide">${plannerSituationGuides[context.situation] || "현재 생활 패턴에 맞춘 식단을 추천합니다."}</p>
       <p class="guide">${context.goalProfile.tips.join(" · ")}</p>
-      <p class="guide">주간 다양성: ${uniqueRecipeCount}개 메뉴 조합</p>
+      <p class="guide">주간 다양성: ${uniqueRecipeCount}개 실존 레시피</p>
     </article>
     <section class="diet-grid">
   `;
@@ -442,7 +464,7 @@ function renderResult(context, weeklyPlan) {
             <span class="meal-kcal">${meal.calories} kcal</span>
           </div>
           <strong>${meal.title}</strong>
-          <p>${meal.protein}P / ${meal.carbs}C / ${meal.fat}F · ${meal.prepTime}분</p>
+          <p>${meal.protein}P / ${meal.carbs}C / ${meal.fat}F · Na ${meal.sodium}mg · ${meal.prepTime}분 · ${meal.portionLabel}</p>
         </button>
       `;
     });
@@ -451,7 +473,7 @@ function renderResult(context, weeklyPlan) {
       <div class="day-total">
         <span>일일 합계</span>
         <strong>${dayPlan.totals.calories} kcal</strong>
-        <small>${dayPlan.totals.protein}P / ${dayPlan.totals.carbs}C / ${dayPlan.totals.fat}F</small>
+        <small>${dayPlan.totals.protein}P / ${dayPlan.totals.carbs}C / ${dayPlan.totals.fat}F / Na ${dayPlan.totals.sodium}mg</small>
       </div>
     </section>`;
   });
@@ -462,7 +484,7 @@ function renderResult(context, weeklyPlan) {
   resultEl.querySelectorAll(".meal-box").forEach((button) => {
     button.addEventListener("click", () => {
       const recipeId = button.dataset.recipeId;
-      const recipe = plannerRecipePool.find((item) => item.id === recipeId);
+      const recipe = weeklyPlan.flatMap((d) => d.meals).find((m) => m.id === recipeId);
       if (recipe) openRecipeModal(recipe);
     });
   });
@@ -478,7 +500,7 @@ function openRecipeModal(recipe) {
     <div class="modal-content" role="dialog" aria-modal="true">
       <button class="close-btn" type="button">닫기</button>
       <h3>${recipe.title}</h3>
-      <div class="modal-meta">${recipe.calories} kcal · 단백질 ${recipe.protein}g · 조리 ${recipe.prepTime}분</div>
+      <div class="modal-meta">${recipe.calories} kcal · 단백질 ${recipe.protein}g · 탄수화물 ${recipe.carbs}g · 지방 ${recipe.fat}g · 나트륨 ${recipe.sodium}mg · 조리 ${recipe.prepTime}분 · ${recipe.portionLabel}</div>
       <h4>재료</h4>
       <ul>${recipe.ingredients.map((item) => `<li>${item}</li>`).join("")}</ul>
       <h4>레시피</h4>
