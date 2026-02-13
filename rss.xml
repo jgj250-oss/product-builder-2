@@ -5,7 +5,7 @@
     <link>https://product-builder-2-2sb.pages.dev/</link>
     <description>맞춤 식단 플래너 VitalPlate의 주요 페이지 및 가이드 업데이트 피드</description>
     <language>ko-kr</language>
-    <lastBuildDate>Fri, 13 Feb 2026 13:20:00 +0000</lastBuildDate>
+    <lastBuildDate>Fri, 13 Feb 2026 13:45:00 +0000</lastBuildDate>
 
     <item>
       <title>VitalPlate 메인 페이지</title>
@@ -20,6 +20,13 @@
       <guid>https://product-builder-2-2sb.pages.dev/guides</guid>
       <pubDate>Fri, 13 Feb 2026 13:20:00 +0000</pubDate>
       <description>목표별 식단 전략과 실행 체크리스트를 모은 허브 페이지</description>
+    </item>
+    <item>
+      <title>콘텐츠 편집 정책</title>
+      <link>https://product-builder-2-2sb.pages.dev/editorial-policy</link>
+      <guid>https://product-builder-2-2sb.pages.dev/editorial-policy</guid>
+      <pubDate>Fri, 13 Feb 2026 13:20:00 +0000</pubDate>
+      <description>출처 선정 기준, 업데이트 주기, 검수 절차, 면책 기준 안내</description>
     </item>
     <item>
       <title>체지방 감량 12주 가이드</title>

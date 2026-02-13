@@ -271,6 +271,28 @@ select {
   text-decoration: none;
 }
 
+.meta-note {
+  margin-top: -6px;
+  margin-bottom: 10px;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
+.reference-list {
+  margin-top: 8px;
+  margin-bottom: 8px;
+  padding-left: 20px;
+}
+
+.reference-list li {
+  margin: 6px 0;
+  line-height: 1.6;
+}
+
+.reference-list a {
+  color: var(--accent-soft);
+}
+
 .guide-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));

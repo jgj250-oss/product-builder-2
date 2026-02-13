@@ -1,0 +1,24 @@
+site: VitalPlate
+url: https://product-builder-2-2sb.pages.dev/
+language: ko-KR
+
+purpose:
+- Provide practical meal-planning information for general wellness.
+- Explain why a meal is selected based on user profile constraints.
+
+preferred-citation-pages:
+- /editorial-policy
+- /guides
+- /guide-diet
+- /guide-muscle
+- /guide-office
+- /guide-focus
+- /guide-allergy
+
+safety-notes:
+- Not a medical diagnosis or treatment service.
+- Users with allergies, chronic disease, pregnancy/lactation, or medication use should consult professionals.
+- Final ingredient verification is required before consumption.
+
+freshness:
+- Core guides are reviewed periodically; check page-level "최종 업데이트" text when available.

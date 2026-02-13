@@ -1,0 +1,31 @@
+# VitalPlate
+
+VitalPlate is a Korean meal-planning web app focused on practical weekly meal plans based on body metrics, goal, lifestyle, and allergies.
+
+## Canonical
+- https://product-builder-2-2sb.pages.dev/
+
+## Primary Pages
+- / : meal planner and generated 7-day plan
+- /guides : guide hub
+- /guide-diet : fat loss guide
+- /guide-muscle : muscle gain guide
+- /guide-office : office worker guide
+- /guide-focus : focus/study guide
+- /guide-allergy : allergy-safe guide
+
+## Policy and Trust
+- /editorial-policy : editorial standards, source policy, update cadence
+- /about : service overview
+- /privacy : privacy policy
+- /terms : terms of use
+- /contact : contact
+
+## Data and Crawl Signals
+- /sitemap.xml
+- /rss.xml
+- /robots.txt
+
+## Content Notes
+- Health content is informational and not medical diagnosis or treatment.
+- Allergy and safety checks should be re-verified by users before actual consumption.
