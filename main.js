@@ -41,7 +41,10 @@ if (!window.VITAL_DATA) {
   console.warn("foodData.js 로드 실패로 폴백 데이터로 실행합니다.");
 }
 
-const { allergyOptions, goalProfiles, situationGuides, recipePool } = dataSource;
+const plannerAllergyOptions = dataSource.allergyOptions;
+const plannerGoalProfiles = dataSource.goalProfiles;
+const plannerSituationGuides = dataSource.situationGuides;
+const plannerRecipePool = dataSource.recipePool;
 
 const dayNames = ["월", "화", "수", "목", "금", "토", "일"];
 const mealOrder = ["breakfast", "lunch", "dinner"];
@@ -85,7 +88,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   if (!allergyContainer.querySelector("input")) {
-    allergyOptions.forEach((item) => {
+    plannerAllergyOptions.forEach((item) => {
       const label = document.createElement("label");
       label.className = "allergy-item";
       label.innerHTML = `<input type="checkbox" value="${item.value}"> ${item.label}`;
@@ -158,7 +161,7 @@ function buildNutritionContext(profile) {
   bmr += profile.gender === "male" ? 5 : -161;
 
   const maintenance = bmr * profile.activity;
-  const goalProfile = goalProfiles[profile.goal] || goalProfiles.general;
+  const goalProfile = plannerGoalProfiles[profile.goal] || plannerGoalProfiles.general;
   const targetCalories = Math.max(1200, Math.round(maintenance + goalProfile.calorieDelta));
 
   return {
@@ -210,10 +213,10 @@ function buildWeeklyPlan(context) {
 }
 
 function pickBestRecipe(mealType, context, usedIds) {
-  let candidates = recipePool.filter((recipe) => recipe.mealType === mealType && isRecipeAllowed(recipe, context));
+  let candidates = plannerRecipePool.filter((recipe) => recipe.mealType === mealType && isRecipeAllowed(recipe, context));
 
   if (!candidates.length) {
-    candidates = recipePool.filter((recipe) => recipe.mealType === mealType);
+    candidates = plannerRecipePool.filter((recipe) => recipe.mealType === mealType);
   }
 
   const ranked = candidates
@@ -279,7 +282,7 @@ function renderResult(context, weeklyPlan) {
         <div><small>목표 칼로리</small><strong>${context.targetCalories} kcal</strong></div>
         <div><small>권장 매크로</small><strong>탄 ${context.macroTarget.carb}g / 단 ${context.macroTarget.protein}g / 지 ${context.macroTarget.fat}g</strong></div>
       </div>
-      <p class="guide">${situationGuides[context.situation] || "현재 생활 패턴에 맞춰 균형 식단을 추천합니다."}</p>
+      <p class="guide">${plannerSituationGuides[context.situation] || "현재 생활 패턴에 맞춰 균형 식단을 추천합니다."}</p>
       <p class="guide">${context.goalProfile.tips.join(" · ")}</p>
     </article>
     <section class="diet-grid">
@@ -316,7 +319,7 @@ function renderResult(context, weeklyPlan) {
   resultEl.querySelectorAll(".meal-box").forEach((button) => {
     button.addEventListener("click", () => {
       const recipeId = button.dataset.recipeId;
-      const recipe = recipePool.find((item) => item.id === recipeId);
+      const recipe = plannerRecipePool.find((item) => item.id === recipeId);
       if (recipe) openRecipeModal(recipe);
     });
   });
