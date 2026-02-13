@@ -486,11 +486,11 @@ function renderResult(context, weeklyPlan) {
   const calorieGap = dailyAverageCalories - context.targetCalories;
 
   const guideByGoal = {
-    diet: { href: "guide-diet.html", label: "체지방 감량 가이드" },
-    muscle: { href: "guide-muscle.html", label: "근육 증가 가이드" },
-    liver: { href: "guide-allergy.html", label: "알레르기·저자극 식단 가이드" },
-    study: { href: "guide-focus.html", label: "집중력 식단 가이드" },
-    general: { href: "guide-office.html", label: "사무직 체형관리 가이드" }
+    diet: { href: "guide-diet", label: "체지방 감량 가이드" },
+    muscle: { href: "guide-muscle", label: "근육 증가 가이드" },
+    liver: { href: "guide-allergy", label: "알레르기·저자극 식단 가이드" },
+    study: { href: "guide-focus", label: "집중력 식단 가이드" },
+    general: { href: "guide-office", label: "사무직 체형관리 가이드" }
   };
   const recommendedGuide = guideByGoal[context.goal] || guideByGoal.general;
 
