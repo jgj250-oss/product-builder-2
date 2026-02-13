@@ -10,6 +10,12 @@
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5008023147519236" crossorigin="anonymous"></script>
 </head>
 <body>
+  <noscript>
+    <div class="runtime-banner noscript-banner">
+      브라우저에서 JavaScript가 비활성화되어 식단 생성 기능이 동작하지 않습니다. JavaScript를 활성화해 주세요.
+    </div>
+  </noscript>
+  <div id="runtime-error" class="runtime-banner" hidden></div>
   <header class="topbar">
     <div class="brand">VitalPlate</div>
     <nav class="topnav" aria-label="주요 메뉴">
@@ -72,7 +78,7 @@
       </div>
 
       <p class="advanced-hint">알레르기와 세부 조건은 아래 패널에서 설정할 수 있습니다.</p>
-      <details class="advanced-panel">
+      <details class="advanced-panel" open>
         <summary>추가 조건 (상황/식사성향/알레르기)</summary>
         <div class="form-grid advanced-grid">
           <label class="input-group">상황
@@ -114,9 +120,19 @@
         </div>
 
         <h3>알레르기</h3>
-        <div id="allergy-list" class="allergy-list"></div>
+        <div id="allergy-list" class="allergy-list">
+          <label class="allergy-item"><input type="checkbox" value="egg"> 계란</label>
+          <label class="allergy-item"><input type="checkbox" value="dairy"> 유제품</label>
+          <label class="allergy-item"><input type="checkbox" value="wheat"> 밀/글루텐</label>
+          <label class="allergy-item"><input type="checkbox" value="peanut"> 땅콩</label>
+          <label class="allergy-item"><input type="checkbox" value="soy"> 대두</label>
+          <label class="allergy-item"><input type="checkbox" value="seafood"> 해산물</label>
+          <label class="allergy-item"><input type="checkbox" value="shellfish"> 갑각류</label>
+          <label class="allergy-item"><input type="checkbox" value="pork"> 돼지고기</label>
+        </div>
       </details>
 
+      <p id="form-error" class="form-error" hidden></p>
       <button id="generate-plan" class="submit-btn" type="button">7일 식단 생성</button>
     </section>
 
@@ -151,7 +167,7 @@
     <p>© 2026 VitalPlate. All rights reserved.</p>
   </footer>
 
-  <script src="foodData.js?v=20260213b" defer></script>
-  <script src="main.js?v=20260213b" defer></script>
+  <script src="foodData.js?v=20260213c" defer></script>
+  <script src="main.js?v=20260213c" defer></script>
 </body>
 </html>

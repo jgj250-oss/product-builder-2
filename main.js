@@ -47,33 +47,75 @@ const dayNames = ["월", "화", "수", "목", "금", "토", "일"];
 const mealOrder = ["breakfast", "lunch", "dinner"];
 const mealLabel = { breakfast: "아침", lunch: "점심", dinner: "저녁" };
 
+function showRuntimeError(message) {
+  const banner = document.getElementById("runtime-error");
+  if (!banner) return;
+  banner.hidden = false;
+  banner.textContent = `오류: ${message}`;
+}
+
+function setFormError(message) {
+  const formError = document.getElementById("form-error");
+  if (!formError) return;
+  if (!message) {
+    formError.hidden = true;
+    formError.textContent = "";
+    return;
+  }
+  formError.hidden = false;
+  formError.textContent = message;
+}
+
+window.addEventListener("error", (event) => {
+  showRuntimeError(event.message || "알 수 없는 스크립트 오류가 발생했습니다.");
+});
+
+window.addEventListener("unhandledrejection", () => {
+  showRuntimeError("처리되지 않은 비동기 오류가 발생했습니다.");
+});
+
 document.addEventListener("DOMContentLoaded", () => {
   const allergyContainer = document.getElementById("allergy-list");
   const generateBtn = document.getElementById("generate-plan");
   const themeBtn = document.getElementById("theme-toggle");
 
-  allergyOptions.forEach((item) => {
-    const label = document.createElement("label");
-    label.className = "allergy-item";
-    label.innerHTML = `<input type="checkbox" value="${item.value}"> ${item.label}`;
-    allergyContainer.appendChild(label);
-  });
+  if (!allergyContainer || !generateBtn) {
+    showRuntimeError("필수 UI 요소를 찾지 못했습니다. 페이지를 새로고침해 주세요.");
+    return;
+  }
 
-  themeBtn.addEventListener("click", () => {
-    document.body.classList.toggle("light-mode");
-    const isLight = document.body.classList.contains("light-mode");
-    themeBtn.textContent = isLight ? "다크 모드" : "라이트 모드";
-  });
+  if (!allergyContainer.querySelector("input")) {
+    allergyOptions.forEach((item) => {
+      const label = document.createElement("label");
+      label.className = "allergy-item";
+      label.innerHTML = `<input type="checkbox" value="${item.value}"> ${item.label}`;
+      allergyContainer.appendChild(label);
+    });
+  }
+
+  if (themeBtn) {
+    themeBtn.addEventListener("click", () => {
+      document.body.classList.toggle("light-mode");
+      const isLight = document.body.classList.contains("light-mode");
+      themeBtn.textContent = isLight ? "다크 모드" : "라이트 모드";
+    });
+  }
 
   generateBtn.addEventListener("click", () => {
-    const profile = collectProfile();
-    if (!profile) {
-      return;
-    }
+    try {
+      const profile = collectProfile();
+      if (!profile) {
+        return;
+      }
+      setFormError("");
 
-    const context = buildNutritionContext(profile);
-    const plan = buildWeeklyPlan(context);
-    renderResult(context, plan);
+      const context = buildNutritionContext(profile);
+      const plan = buildWeeklyPlan(context);
+      renderResult(context, plan);
+    } catch (error) {
+      showRuntimeError("식단 생성 중 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.");
+      console.error(error);
+    }
   });
 });
 
@@ -83,7 +125,11 @@ function collectProfile() {
   const weight = Number(document.getElementById("weight").value);
 
   if (!age || !height || !weight) {
-    alert("나이, 키, 체중을 모두 입력해주세요.");
+    setFormError("나이, 키, 체중을 모두 입력해 주세요.");
+    return null;
+  }
+  if (age < 14 || age > 90 || height < 130 || height > 220 || weight < 35 || weight > 180) {
+    setFormError("입력 범위를 확인해 주세요. (나이 14~90, 키 130~220, 체중 35~180)");
     return null;
   }
 
@@ -233,7 +279,7 @@ function renderResult(context, weeklyPlan) {
         <div><small>목표 칼로리</small><strong>${context.targetCalories} kcal</strong></div>
         <div><small>권장 매크로</small><strong>탄 ${context.macroTarget.carb}g / 단 ${context.macroTarget.protein}g / 지 ${context.macroTarget.fat}g</strong></div>
       </div>
-      <p class="guide">${situationGuides[context.situation]}</p>
+      <p class="guide">${situationGuides[context.situation] || "현재 생활 패턴에 맞춰 균형 식단을 추천합니다."}</p>
       <p class="guide">${context.goalProfile.tips.join(" · ")}</p>
     </article>
     <section class="diet-grid">
